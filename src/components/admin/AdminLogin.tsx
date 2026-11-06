@@ -70,7 +70,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
         )}
 
         {/* Login Form */}
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
           <div>
             <label className="block text-xs font-semibold text-stone-700 mb-1.5">
               Username

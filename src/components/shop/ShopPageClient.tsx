@@ -241,20 +241,20 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
             {/* Our Other Services Referral Link */}
             <Link
               href="/services"
-              className="w-full py-2.5 px-4 rounded-2xl bg-white hover:bg-stone-50 border border-[#EDE8E1] text-xs font-semibold text-stone-700 hover:text-stone-900 shadow-sm flex items-center justify-between transition group mb-3.5"
+              className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-stone-50 border border-[#EDE8E1] text-xs font-semibold text-stone-800 shadow-sm flex items-center justify-between transition group mb-3 hover:border-stone-300 active:scale-[0.99]"
             >
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Our Other Services &amp; Digital Solutions</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="font-bold text-stone-900">Our Other Services &amp; Digital Solutions</span>
               </div>
               <div className="flex items-center gap-1 text-[#5C3A21] font-bold">
                 <span>View</span>
-                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </Link>
 
-            {/* Designed & Developed by Piyush Assudani */}
-            <div className="text-[11px] text-stone-500 font-medium">
+            {/* Attached Developer Credits */}
+            <div className="text-[11px] text-stone-600 font-medium">
               Designed &amp; Developed by{' '}
               <a
                 href="https://piyushassudani.in"
@@ -264,15 +264,32 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
               >
                 Piyush Assudani
               </a>{' '}
-              (Assudani Developer)
+              <span className="text-stone-400">(Assudani Developer)</span>
             </div>
 
-            <div className="mt-1 text-[10px] text-stone-400">
+            {/* Phone Number, WhatsApp & Website Attached */}
+            <div className="mt-1.5 flex items-center justify-center gap-2 sm:gap-2.5 text-[11px] text-stone-500 font-medium flex-wrap">
+              <a
+                href="tel:+919413879444"
+                className="inline-flex items-center gap-1 text-[#5C3A21] hover:underline font-semibold"
+              >
+                <span>📞 +91 9413879444</span>
+              </a>
+              <span className="text-stone-300">•</span>
+              <a
+                href="https://wa.me/919413879444?text=Hello%20Piyush%2C%20I%20saw%20your%20NFC%20project%20and%20want%20to%20connect."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-700 hover:underline font-semibold"
+              >
+                WhatsApp
+              </a>
+              <span className="text-stone-300">•</span>
               <a
                 href="https://piyushassudani.in"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-stone-700 transition font-medium"
+                className="text-stone-600 hover:text-stone-900 hover:underline font-medium"
               >
                 piyushassudani.in
               </a>

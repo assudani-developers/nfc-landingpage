@@ -554,7 +554,17 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
               </div>
             )}
 
-            <form onSubmit={handleUpdateCreds} className="space-y-4">
+            <form
+              onSubmit={handleUpdateCreds}
+              className="space-y-4"
+              autoComplete="off"
+              data-lpignore="true"
+            >
+              <div style={{ display: 'none' }} aria-hidden="true">
+                <input type="text" name="chrome_absorb_user" tabIndex={-1} autoComplete="off" />
+                <input type="password" name="chrome_absorb_pass" tabIndex={-1} autoComplete="new-password" />
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-stone-700 mb-1">
                   Database Username
@@ -562,6 +572,11 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
                 <input
                   type="text"
                   required
+                  name="firestore_admin_username_field"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-form-type="other"
                   value={adminUser}
                   onChange={(e) => setAdminUser(e.target.value)}
                   className="w-full bg-[#FAF7F2] border border-stone-200 rounded-xl px-3.5 py-2 text-sm text-stone-900 font-mono focus:outline-none focus:border-[#5C3A21]"
@@ -575,6 +590,11 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
                 <input
                   type="text"
                   required
+                  name="firestore_admin_pin_field"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-form-type="other"
                   value={adminPass}
                   onChange={(e) => setAdminPass(e.target.value)}
                   className="w-full bg-[#FAF7F2] border border-stone-200 rounded-xl px-3.5 py-2 text-sm text-stone-900 font-mono focus:outline-none focus:border-[#5C3A21]"

@@ -178,13 +178,21 @@ export default function ServicesPage() {
         {/* Contact CTAs */}
         <div className="mt-6 pt-5 border-t border-stone-100 space-y-2.5">
           <a
-            href="https://wa.me/919999888877?text=Hello%20Piyush%2C%20I%20saw%20your%20NFC%20project%20and%20want%20to%20order%20an%20NFC%20smart%20card%20for%20my%20business"
+            href="https://wa.me/919413879444?text=Hello%20Piyush%2C%20I%20saw%20your%20NFC%20project%20and%20want%20to%20order%20an%20NFC%20smart%20card%20for%20my%20business"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center justify-center gap-2 shadow-sm transition active:scale-[0.99]"
           >
             <WhatsAppIcon className="w-4 h-4" />
-            <span>Order NFC Smart Card on WhatsApp</span>
+            <span>Chat on WhatsApp (+91 9413879444)</span>
+          </a>
+
+          <a
+            href="tel:+919413879444"
+            className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-stone-900 hover:bg-stone-800 text-white flex items-center justify-center gap-2 shadow-sm transition active:scale-[0.99]"
+          >
+            <Phone className="w-4 h-4 text-amber-300" />
+            <span>Call Directly: +91 9413879444</span>
           </a>
 
           <a
