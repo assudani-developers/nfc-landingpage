@@ -14,3 +14,4 @@ export function useIsClient(): boolean {
     () => false
   );
 }
+

@@ -244,28 +244,54 @@ export default function ShopEditModal({
       return;
     }
 
-    const googleReview = links.find((l) => l.type === 'google_review');
-    if (!googleReview || !googleReview.url.trim()) {
-      setError('A valid Google Review URL is required (mandatory link).');
-      return;
-    }
-
-    const whatsappLink = links.find((l) => l.type === 'whatsapp');
-    if (whatsappLink) {
-      const parsed = parseWhatsAppUrl(whatsappLink.url);
-      if (!parsed.phone || parsed.phone.length < 7) {
-        setError('Please enter a valid WhatsApp mobile number for appointments.');
-        return;
-      }
-    }
-
-    if (links.length > 5) {
-      setError('A maximum of 5 links are allowed.');
-      return;
-    }
-
     setIsSubmitting(true);
     setError(null);
+
+    // Normalize and clean all links
+    const cleanedLinks: ShopLink[] = [];
+    for (const link of links) {
+      let finalUrl = (link.url || '').trim();
+
+      if (link.type === 'whatsapp') {
+        const parsed = parseWhatsAppUrl(finalUrl);
+        if (!parsed.phone) {
+          continue; // skip if phone wasn't filled
+        }
+        finalUrl = buildWhatsAppUrl(parsed.phone, parsed.msg);
+      } else if (link.type === 'google_review') {
+        if (!finalUrl || finalUrl === 'https://...' || finalUrl === 'https://') {
+          // Auto-generate Google Search Review URL
+          finalUrl = `https://www.google.com/search?q=${encodeURIComponent(name.trim() + ' reviews')}`;
+        } else if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
+          finalUrl = `https://${finalUrl}`;
+        }
+      } else {
+        // Social / Website links
+        if (!finalUrl || finalUrl === 'https://' || finalUrl === 'https://...') {
+          continue; // skip empty links
+        }
+        if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
+          finalUrl = `https://${finalUrl}`;
+        }
+      }
+
+      cleanedLinks.push({
+        ...link,
+        url: finalUrl,
+      });
+    }
+
+    // Ensure at least one review or primary link exists
+    if (cleanedLinks.length === 0) {
+      cleanedLinks.push({
+        id: 'link-review-default',
+        type: 'google_review',
+        title: 'Google Reviews',
+        subtitle: '⭐ Tap to rate 5 stars',
+        url: `https://www.google.com/search?q=${encodeURIComponent(name.trim() + ' reviews')}`,
+        featured: true,
+      });
+    }
 
     try {
       const shopToSave: Shop = {
@@ -284,7 +310,7 @@ export default function ShopEditModal({
         rating: initialShop?.rating || 4.9,
         reviewCount: initialShop?.reviewCount || 150,
         showReferral,
-        links,
+        links: cleanedLinks,
         viewsCount: initialShop?.viewsCount || 0,
         tapsCount: initialShop?.tapsCount || 0,
         createdAt: initialShop?.createdAt || Date.now(),
@@ -294,7 +320,7 @@ export default function ShopEditModal({
       await onSave(shopToSave);
       onClose();
     } catch (err: unknown) {
-      setError((err as Error)?.message || 'Failed to save shop');
+      setError((err as Error)?.message || 'Failed to save shop card. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -305,8 +331,8 @@ export default function ShopEditModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white border border-[#EDE8E1] rounded-3xl max-w-2xl w-full p-6 sm:p-8 relative shadow-2xl my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto">
+      <div className="bg-white border border-[#EDE8E1] rounded-[32px] max-w-4xl w-full p-6 sm:p-9 relative shadow-2xl my-6 sm:my-10">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-stone-200">
           <div className="flex items-center gap-3">
@@ -607,22 +633,6 @@ export default function ShopEditModal({
                 ))}
               </div>
             </div>
-
-            {/* Manual Image URL Input */}
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                name="biz_shop_cover_url"
-                autoComplete="off"
-                data-lpignore="true"
-                data-1p-ignore="true"
-                data-form-type="other"
-                value={coverUrl}
-                onChange={(e) => setCoverUrl(e.target.value)}
-                placeholder="Or paste direct image URL (https://...)"
-                className="w-full bg-[#FAF7F2] border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#5C3A21] font-mono"
-              />
-            </div>
           </div>
 
           {/* Section 4: Shop Logo (Gallery Upload + Presets) */}
@@ -638,8 +648,13 @@ export default function ShopEditModal({
             {/* Direct Gallery Upload Trigger Card */}
             <div className="p-3.5 rounded-2xl border-2 border-dashed border-[#5C3A21]/30 hover:border-[#5C3A21] bg-[#FAF7F2] hover:bg-[#F3ECE4] transition group flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-[#5C3A21] shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform">
-                  <Upload className="w-5 h-5 text-[#5C3A21]" />
+                <div className="w-12 h-12 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-[#5C3A21] shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
+                  {logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    <Upload className="w-5 h-5 text-[#5C3A21]" />
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -653,7 +668,7 @@ export default function ShopEditModal({
                     )}
                   </div>
                   <p className="text-[11px] text-stone-500 mt-0.5">
-                    Pick your brand logo or photo from phone/gallery • Stored directly in Firestore
+                    Pick your brand logo or photo from phone/gallery • Auto-optimized for DB
                   </p>
                 </div>
               </div>
@@ -699,22 +714,6 @@ export default function ShopEditModal({
                   </button>
                 ))}
               </div>
-            </div>
-
-            {/* Manual Image URL Input */}
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                name="biz_shop_logo_url"
-                autoComplete="off"
-                data-lpignore="true"
-                data-1p-ignore="true"
-                data-form-type="other"
-                value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
-                placeholder="Or paste direct image URL (https://...)"
-                className="w-full bg-[#FAF7F2] border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#5C3A21] font-mono"
-              />
             </div>
           </div>
 
@@ -877,11 +876,10 @@ export default function ShopEditModal({
                       ) : (
                         <div className="sm:col-span-2">
                           <label className="text-[10px] text-stone-500 block mb-0.5 font-medium">
-                            Destination Link URL
+                            Destination Link URL {isGoogleReview && '(Auto-generated if empty)'}
                           </label>
                           <input
-                            type="url"
-                            required
+                            type="text"
                             name={`link_url_${link.id}`}
                             autoComplete="off"
                             data-lpignore="true"
@@ -889,7 +887,13 @@ export default function ShopEditModal({
                             data-form-type="other"
                             value={link.url}
                             onChange={(e) => handleUpdateLink(link.id, { url: e.target.value })}
-                            placeholder={isGoogleReview ? 'https://search.google.com/local/writereview?placeid=...' : 'https://...'}
+                            onBlur={(e) => {
+                              const val = e.target.value.trim();
+                              if (val && !val.startsWith('http://') && !val.startsWith('https://')) {
+                                handleUpdateLink(link.id, { url: `https://${val}` });
+                              }
+                            }}
+                            placeholder={isGoogleReview ? 'Google Review link or Place ID (optional)' : 'e.g. assudanigroup.online or https://...'}
                             className="w-full bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs text-stone-900 font-mono focus:outline-none focus:border-[#5C3A21]"
                           />
                         </div>
@@ -925,6 +929,14 @@ export default function ShopEditModal({
               />
             </button>
           </div>
+
+          {/* Bottom Error Feedback if any */}
+          {error && (
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
+              <span className="font-semibold">{error}</span>
+            </div>
+          )}
 
           {/* Form Actions */}
           <div className="pt-4 border-t border-stone-200 flex items-center justify-end gap-3">
