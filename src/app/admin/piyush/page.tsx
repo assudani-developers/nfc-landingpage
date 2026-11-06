@@ -28,3 +28,4 @@ export default function PiyushAdminPage() {
 
   return <AdminDashboard onLogout={() => setIsAuthenticated(false)} />;
 }
+

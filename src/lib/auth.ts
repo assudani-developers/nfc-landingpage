@@ -51,3 +51,4 @@ export function logoutAdmin(): void {
     document.cookie = `piyush_admin_auth=; path=/; max-age=0; SameSite=Lax`;
   }
 }
+

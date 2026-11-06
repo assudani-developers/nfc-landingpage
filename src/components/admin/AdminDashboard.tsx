@@ -20,14 +20,12 @@ import {
   Search,
   LogOut,
   Database,
-  BarChart3,
-  Sparkles,
-  HelpCircle,
   RefreshCw,
   CheckCircle2,
-  Shield,
   Layers,
+  Globe,
 } from 'lucide-react';
+import Link from 'next/link';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -102,43 +100,51 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const totalViews = shops.reduce((acc, s) => acc + (s.viewsCount || 0), 0);
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex flex-col">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between">
+    <div className="min-h-screen w-full bg-[#FAF7F2] text-stone-900 flex flex-col font-sans">
+      {/* Top Header */}
+      <header className="sticky top-0 z-40 bg-white/95 border-b border-[#EDE8E1] backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 p-0.5 shadow-md shadow-amber-500/20">
-            <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-              <NfcWaveIcon className="w-5 h-5 text-amber-400" />
-            </div>
+          <div className="w-10 h-10 rounded-2xl bg-[#5C3A21] flex items-center justify-center shadow-md shadow-[#5C3A21]/20">
+            <NfcWaveIcon className="w-5 h-5 text-amber-200" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold text-white tracking-tight">
+              <h1 className="text-base font-bold text-stone-900 tracking-tight">
                 Piyush Admin Hub
               </h1>
-              <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">
+              <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#F3ECE4] text-[#633917] border border-[#E5DACD]">
                 /admin/piyush
               </span>
             </div>
-            <p className="text-xs text-slate-400">
-              NFC Tags, QR Standees & Shop URL Manager
+            <p className="text-xs text-stone-500">
+              NFC Shop Cards, QR Standees &amp; Link Manager
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* View Website */}
+          <Link
+            href="/"
+            target="_blank"
+            className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold hidden sm:flex items-center gap-1.5 transition"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Open Shop Page</span>
+          </Link>
+
           {/* Firebase Status Badge */}
           <button
             onClick={() => setShowFirebaseInfo(!showFirebaseInfo)}
             className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition ${
               isFirebaseConfigured
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20'
-                : 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-amber-50 border-amber-200 text-amber-900'
             }`}
           >
-            <Database className="w-3.5 h-3.5" />
+            <Database className="w-3.5 h-3.5 text-amber-700" />
             <span className="hidden sm:inline">
-              {isFirebaseConfigured ? 'Firebase: Connected' : 'Firebase: Local Storage Active'}
+              {isFirebaseConfigured ? 'Firebase: Connected' : 'Firebase: Local Active'}
             </span>
             <span className="sm:hidden">
               {isFirebaseConfigured ? 'Firebase' : 'Local DB'}
@@ -148,7 +154,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           {/* Add Shop Button */}
           <button
             onClick={() => setIsCreatingNew(true)}
-            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition shadow-lg shadow-amber-500/20 active:scale-95"
+            className="px-3.5 py-1.5 rounded-xl bg-[#5C3A21] hover:bg-[#472c19] text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm active:scale-95"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Add New Shop</span>
@@ -161,8 +167,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               logoutAdmin();
               onLogout();
             }}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 text-slate-400 transition"
-            title="Log Out of Piyush Admin"
+            className="p-2 rounded-xl bg-stone-100 hover:bg-rose-50 hover:text-rose-700 text-stone-500 transition"
+            title="Log Out"
           >
             <LogOut className="w-4 h-4" />
           </button>
@@ -171,32 +177,32 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6">
-        {/* Firebase Config Drawer / Banner */}
+        {/* Firebase Info Banner */}
         {showFirebaseInfo && (
-          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-700/80 shadow-xl relative animate-in fade-in slide-in-from-top-4 duration-200">
+          <div className="p-5 rounded-2xl bg-white border border-[#EDE8E1] shadow-lg relative animate-in fade-in slide-in-from-top-4 duration-200">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2 mb-2">
-                <Database className="w-5 h-5 text-amber-400" />
-                <h3 className="text-sm font-bold text-white">
-                  Firebase Firestore Database Status
+                <Database className="w-5 h-5 text-[#5C3A21]" />
+                <h3 className="text-sm font-bold text-stone-900">
+                  Firebase Database Status &amp; Configuration
                 </h3>
               </div>
               <button
                 onClick={() => setShowFirebaseInfo(false)}
-                className="text-slate-400 hover:text-white text-xs"
+                className="text-stone-400 hover:text-stone-700 text-xs font-semibold"
               >
                 Dismiss
               </button>
             </div>
 
-            <p className="text-xs text-slate-300 mb-3">
+            <p className="text-xs text-stone-600 mb-3">
               {isFirebaseConfigured
-                ? `Connected to Firebase Project: "${firebaseConfig.projectId}". All shops and taps sync to live Firestore.`
-                : `Currently using LocalStorage & In-Memory Store with automatic fallback. To connect live Firebase, add your credentials in .env.local file:`}
+                ? `Connected to Firebase Project: "${firebaseConfig.projectId}". All shops and card taps sync live with Firestore.`
+                : `Currently running on LocalStorage & In-Memory Store with automatic fallback. To connect live Firestore, add your keys in .env.local:`}
             </p>
 
             {!isFirebaseConfigured && (
-              <pre className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono text-amber-300 overflow-x-auto mb-3">
+              <pre className="p-3 rounded-xl bg-[#F9F6F0] border border-[#E5DACD] text-[11px] font-mono text-[#633917] overflow-x-auto mb-3">
 {`NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
@@ -209,14 +215,14 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
             <div className="flex items-center gap-3">
               <button
                 onClick={handleResetData}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 flex items-center gap-1.5 transition"
+                className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-xs font-medium text-stone-700 flex items-center gap-1.5 transition"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Reset Demo Shops</span>
               </button>
               <button
                 onClick={loadShops}
-                className="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs flex items-center gap-1.5 border border-amber-500/30 transition"
+                className="px-3 py-1.5 rounded-lg bg-[#F3ECE4] hover:bg-[#EAE0D5] text-[#633917] text-xs font-semibold flex items-center gap-1.5 border border-[#E5DACD] transition"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Refresh Data</span>
@@ -227,71 +233,71 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
 
         {/* Stats Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm">
-            <span className="text-xs text-slate-400 block mb-1">Total Shops</span>
-            <div className="text-2xl font-black text-white">{shops.length}</div>
-            <span className="text-[11px] text-amber-400">All with unique URLs</span>
+          <div className="p-4 rounded-2xl bg-white border border-[#EDE8E1] shadow-sm">
+            <span className="text-xs text-stone-500 block mb-1">Active Shops</span>
+            <div className="text-2xl font-black text-stone-900">{shops.length}</div>
+            <span className="text-[11px] text-[#8C6239] font-medium">With unique URLs</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm">
-            <span className="text-xs text-slate-400 block mb-1">Total NFC Card Taps</span>
-            <div className="text-2xl font-black text-emerald-400">{totalTaps}</div>
-            <span className="text-[11px] text-slate-400">Physical contactless visits</span>
+          <div className="p-4 rounded-2xl bg-white border border-[#EDE8E1] shadow-sm">
+            <span className="text-xs text-stone-500 block mb-1">NFC Card Taps</span>
+            <div className="text-2xl font-black text-emerald-700">{totalTaps}</div>
+            <span className="text-[11px] text-stone-500">Contactless visits</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm">
-            <span className="text-xs text-slate-400 block mb-1">Total Page Views</span>
-            <div className="text-2xl font-black text-sky-400">{totalViews}</div>
-            <span className="text-[11px] text-slate-400">QR scans & link clicks</span>
+          <div className="p-4 rounded-2xl bg-white border border-[#EDE8E1] shadow-sm">
+            <span className="text-xs text-stone-500 block mb-1">Total Page Views</span>
+            <div className="text-2xl font-black text-stone-900">{totalViews}</div>
+            <span className="text-[11px] text-stone-500">QR scans &amp; web visits</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm">
-            <span className="text-xs text-slate-400 block mb-1">Review Enforcement</span>
-            <div className="text-2xl font-black text-amber-300">100%</div>
-            <span className="text-[11px] text-amber-400/80">Google Review mandatory</span>
+          <div className="p-4 rounded-2xl bg-white border border-[#EDE8E1] shadow-sm">
+            <span className="text-xs text-stone-500 block mb-1">Theme Mode</span>
+            <div className="text-2xl font-black text-[#5C3A21]">Light</div>
+            <span className="text-[11px] text-[#8C6239] font-medium">Warm Ivory &amp; Cream</span>
           </div>
         </div>
 
         {/* Shops Directory Header & Filter */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
           <div>
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Layers className="w-5 h-5 text-amber-400" />
-              <span>Configured NFC Shops & Standees</span>
+            <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
+              <Layers className="w-5 h-5 text-[#5C3A21]" />
+              <span>Configured NFC Shops &amp; URLs</span>
             </h2>
-            <p className="text-xs text-slate-400">
-              Each shop has its own dedicated URL to write to NFC cards or generate QR standees.
+            <p className="text-xs text-stone-500">
+              Each shop gets its own distinct URL to program onto NFC tags or print onto standees.
             </p>
           </div>
 
           <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search shops or slugs..."
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition"
+              className="w-full bg-white border border-[#EDE8E1] rounded-xl pl-9 pr-4 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#5C3A21] shadow-sm transition"
             />
           </div>
         </div>
 
         {/* Shops Grid */}
         {loading ? (
-          <div className="py-20 flex flex-col items-center justify-center text-slate-400">
-            <RefreshCw className="w-8 h-8 animate-spin text-amber-400 mb-2" />
+          <div className="py-20 flex flex-col items-center justify-center text-stone-400">
+            <RefreshCw className="w-8 h-8 animate-spin text-[#5C3A21] mb-2" />
             <p className="text-xs">Loading shop directory...</p>
           </div>
         ) : filteredShops.length === 0 ? (
-          <div className="py-16 text-center rounded-3xl border border-dashed border-slate-800 bg-slate-900/40 p-8">
-            <NfcWaveIcon className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-white mb-1">No Shops Found</h3>
-            <p className="text-xs text-slate-400 mb-4">
-              {searchQuery ? 'No shops match your search.' : 'Get started by adding your first NFC shop!'}
+          <div className="py-16 text-center rounded-3xl border border-dashed border-stone-300 bg-white p-8">
+            <NfcWaveIcon className="w-12 h-12 text-stone-300 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-stone-800 mb-1">No Shops Found</h3>
+            <p className="text-xs text-stone-500 mb-4">
+              {searchQuery ? 'No shops match your search query.' : 'Add your first NFC shop card to get started!'}
             </p>
             <button
               onClick={() => setIsCreatingNew(true)}
-              className="py-2 px-4 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition"
+              className="py-2 px-4 rounded-xl bg-[#5C3A21] text-white font-bold text-xs hover:bg-[#472c19] transition"
             >
               Add First Shop
             </button>
@@ -299,21 +305,20 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredShops.map((shop) => {
-              const theme = THEMES[shop.theme] || THEMES.gold;
               const fullShopUrl = `${baseUrl}/${shop.slug}`;
               const isCopied = copiedId === shop.id;
 
               return (
                 <div
                   key={shop.id}
-                  className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-3xl p-5 flex flex-col justify-between transition-all duration-200 shadow-lg hover:shadow-xl group"
+                  className="bg-white border border-[#EDE8E1] rounded-3xl p-5 flex flex-col justify-between transition-all duration-200 shadow-md hover:shadow-lg group"
                 >
                   <div>
                     {/* Top Shop Bar */}
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-3 min-w-0">
                         {/* Logo */}
-                        <div className="relative w-12 h-12 rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 flex-shrink-0 shadow-md">
+                        <div className="relative w-12 h-12 rounded-2xl overflow-hidden border border-stone-200 bg-[#FAF7F2] flex-shrink-0 shadow-sm">
                           {shop.logoUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -322,66 +327,61 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span className="w-full h-full flex items-center justify-center font-bold text-white text-lg">
+                            <span className="w-full h-full flex items-center justify-center font-bold text-[#5C3A21] text-lg">
                               {shop.name.charAt(0)}
                             </span>
                           )}
                         </div>
 
                         <div className="min-w-0">
-                          <h3 className="text-base font-bold text-white tracking-tight truncate group-hover:text-amber-300 transition-colors">
+                          <h3 className="text-base font-bold text-stone-900 tracking-tight truncate group-hover:text-[#5C3A21] transition-colors">
                             {shop.name}
                           </h3>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[11px] text-slate-400 truncate">
+                            <span className="text-[11px] text-stone-500 truncate">
                               {shop.category}
                             </span>
-                            <span className="w-1 h-1 rounded-full bg-slate-700"></span>
-                            <span className="text-[11px] font-semibold text-amber-400">
+                            <span className="w-1 h-1 rounded-full bg-stone-300"></span>
+                            <span className="text-[11px] font-bold text-amber-700">
                               ⭐ {shop.rating.toFixed(1)}
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Theme Pill */}
-                      <span
-                        className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm"
-                        style={{ backgroundColor: theme.starColor }}
-                        title={`Theme: ${theme.name}`}
-                      />
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#F3ECE4] text-[#633917] border border-[#E5DACD]">
+                        {shop.theme}
+                      </span>
                     </div>
 
                     {/* Tagline */}
-                    <p className="text-xs text-slate-400 line-clamp-2 mb-3.5">
+                    <p className="text-xs text-stone-600 line-clamp-2 mb-3.5">
                       {shop.tagline}
                     </p>
 
-                    {/* ============================================================== */}
-                    {/* CUSTOM URL DISPLAY BOX (Admin requirement)                     */}
-                    {/* ============================================================== */}
-                    <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 mb-3.5 flex items-center justify-between gap-2">
+                    {/* CUSTOM URL DISPLAY BOX */}
+                    <div className="p-2.5 rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] mb-3.5 flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <span className="text-[10px] text-slate-500 uppercase font-mono block">
-                          NFC Tag Destination:
+                        <span className="text-[10px] text-stone-500 uppercase font-mono block">
+                          NFC Destination URL:
                         </span>
-                        <span className="text-xs font-mono font-semibold text-amber-300 truncate block">
+                        <span className="text-xs font-mono font-bold text-[#5C3A21] truncate block">
                           /{shop.slug}
                         </span>
                       </div>
                       <button
                         onClick={() => handleCopyShopUrl(shop.slug, shop.id)}
-                        className="py-1 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1 transition flex-shrink-0"
+                        className="py-1 px-2.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 hover:text-stone-950 text-xs font-semibold flex items-center gap-1 transition flex-shrink-0 shadow-sm"
                         title="Copy full URL for NFC tag"
                       >
                         {isCopied ? (
                           <>
-                            <Check className="w-3.5 h-3.5 text-emerald-400" />
-                            <span className="text-emerald-400">Copied</span>
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            <span className="text-emerald-700 font-bold">Copied</span>
                           </>
                         ) : (
                           <>
-                            <Copy className="w-3.5 h-3.5" />
+                            <Copy className="w-3.5 h-3.5 text-stone-500" />
                             <span>Copy URL</span>
                           </>
                         )}
@@ -390,15 +390,15 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
 
                     {/* Active Configured Links Badges (1 min, 5 max) */}
                     <div className="mb-4">
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1.5">
-                        <span className="font-semibold">Active Links ({shop.links.length}/5):</span>
-                        <span className="text-slate-500">Only configured show</span>
+                      <div className="flex items-center justify-between text-[11px] text-stone-500 mb-1.5">
+                        <span className="font-semibold text-stone-700">Active Links ({shop.links.length}/5):</span>
+                        <span className="text-stone-400">Only configured show</span>
                       </div>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {shop.links.map((link) => (
                           <div
                             key={link.id}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-[11px] text-slate-300"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-stone-200 text-[11px] text-stone-700 font-medium shadow-xs"
                             title={`${link.title}: ${link.url}`}
                           >
                             <LocalBrandIcon type={link.type} className="w-3.5 h-3.5" />
@@ -410,15 +410,15 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
                   </div>
 
                   {/* Actions Footer */}
-                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
                       {/* Standee QR Modal Button */}
                       <button
                         onClick={() => setQrShop(shop)}
-                        className="py-1.5 px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center gap-1.5 transition"
+                        className="py-1.5 px-2.5 rounded-xl bg-[#F3ECE4] hover:bg-[#EAE0D5] border border-[#E5DACD] text-[#633917] text-xs font-bold flex items-center gap-1.5 transition"
                         title="Generate QR code and printable standee"
                       >
-                        <QrCode className="w-3.5 h-3.5 text-amber-400" />
+                        <QrCode className="w-3.5 h-3.5 text-[#8C6239]" />
                         <span>QR Standee</span>
                       </button>
 
@@ -427,7 +427,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
                         href={`/${shop.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                        className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition"
                         title="Open NFC Landing Page in new tab"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -438,7 +438,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
                       {/* Edit Shop */}
                       <button
                         onClick={() => setEditingShop(shop)}
-                        className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                        className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition"
                         title="Edit Shop Details & Links"
                       >
                         <Edit className="w-3.5 h-3.5" />
@@ -447,7 +447,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
                       {/* Delete Shop */}
                       <button
                         onClick={() => handleDeleteShop(shop.id, shop.name)}
-                        className="p-2 rounded-xl bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition"
+                        className="p-2 rounded-xl bg-stone-100 hover:bg-rose-50 text-stone-500 hover:text-rose-700 transition"
                         title="Delete Shop"
                       >
                         <Trash2 className="w-3.5 h-3.5" />

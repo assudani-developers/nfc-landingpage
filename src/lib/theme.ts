@@ -2,88 +2,81 @@ import { ShopTheme } from '@/types';
 
 export interface ThemeConfig {
   name: string;
-  badge: string;
-  bgGradient: string;
+  bgPage: string;
   cardBg: string;
   cardBorder: string;
-  glowColor: string;
-  accentColor: string;
-  accentText: string;
   primaryButton: string;
+  primaryButtonText: string;
+  accentText: string;
+  badge: string;
   starColor: string;
 }
 
 export const THEMES: Record<ShopTheme, ThemeConfig> = {
+  warm_cafe: {
+    name: 'Warm Café Latte',
+    bgPage: 'bg-[#F9F6F0]',
+    cardBg: 'bg-white',
+    cardBorder: 'border-[#EDE8E1]',
+    primaryButton: 'bg-[#5C3A21] hover:bg-[#4A2E19] text-white shadow-md shadow-[#5C3A21]/20',
+    primaryButtonText: 'text-white',
+    accentText: 'text-[#5C3A21]',
+    badge: 'bg-[#F3ECE4] text-[#633917] border-[#E5DACD]',
+    starColor: '#D97706',
+  },
   gold: {
-    name: 'Royal Gold',
-    badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    bgGradient: 'from-amber-950/40 via-slate-950 to-black',
-    cardBg: 'bg-gradient-to-b from-slate-900/90 to-slate-950/95',
-    cardBorder: 'border-amber-500/30 hover:border-amber-400/60',
-    glowColor: 'rgba(245, 158, 11, 0.25)',
-    accentColor: 'from-amber-400 via-amber-500 to-yellow-600',
-    accentText: 'text-amber-400',
-    primaryButton: 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-slate-950 hover:from-amber-400 hover:to-yellow-500 shadow-amber-500/25',
-    starColor: '#F59E0B',
+    name: 'Caramel Amber',
+    bgPage: 'bg-[#FDFBF7]',
+    cardBg: 'bg-white',
+    cardBorder: 'border-[#EFE7D8]',
+    primaryButton: 'bg-[#854D0E] hover:bg-[#713F12] text-white shadow-md shadow-[#854D0E]/20',
+    primaryButtonText: 'text-white',
+    accentText: 'text-[#854D0E]',
+    badge: 'bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]',
+    starColor: '#D97706',
   },
   emerald: {
-    name: 'Imperial Emerald',
-    badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    bgGradient: 'from-emerald-950/40 via-slate-950 to-black',
-    cardBg: 'bg-gradient-to-b from-slate-900/90 to-slate-950/95',
-    cardBorder: 'border-emerald-500/30 hover:border-emerald-400/60',
-    glowColor: 'rgba(16, 185, 129, 0.25)',
-    accentColor: 'from-emerald-400 via-teal-400 to-green-500',
-    accentText: 'text-emerald-400',
-    primaryButton: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-slate-950 hover:from-emerald-400 hover:to-teal-400 shadow-emerald-500/25',
-    starColor: '#10B981',
-  },
-  cyber: {
-    name: 'Cyber Violet',
-    badge: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-    bgGradient: 'from-purple-950/40 via-slate-950 to-black',
-    cardBg: 'bg-gradient-to-b from-slate-900/90 to-slate-950/95',
-    cardBorder: 'border-purple-500/30 hover:border-purple-400/60',
-    glowColor: 'rgba(168, 85, 247, 0.25)',
-    accentColor: 'from-purple-400 via-fuchsia-400 to-pink-500',
-    accentText: 'text-purple-400',
-    primaryButton: 'bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-600 text-white hover:from-purple-400 hover:to-pink-500 shadow-purple-500/25',
-    starColor: '#A855F7',
+    name: 'Forest Matcha',
+    bgPage: 'bg-[#F6FAF7]',
+    cardBg: 'bg-white',
+    cardBorder: 'border-[#E2EDE6]',
+    primaryButton: 'bg-[#1E4D36] hover:bg-[#163B29] text-white shadow-md shadow-[#1E4D36]/20',
+    primaryButtonText: 'text-white',
+    accentText: 'text-[#1E4D36]',
+    badge: 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]',
+    starColor: '#059669',
   },
   sunset: {
-    name: 'Sunset Coral',
-    badge: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-    bgGradient: 'from-rose-950/40 via-slate-950 to-black',
-    cardBg: 'bg-gradient-to-b from-slate-900/90 to-slate-950/95',
-    cardBorder: 'border-rose-500/30 hover:border-rose-400/60',
-    glowColor: 'rgba(244, 63, 94, 0.25)',
-    accentColor: 'from-rose-400 via-orange-400 to-amber-500',
-    accentText: 'text-rose-400',
-    primaryButton: 'bg-gradient-to-r from-rose-500 via-orange-500 to-amber-600 text-white hover:from-rose-400 hover:to-amber-500 shadow-rose-500/25',
-    starColor: '#F43F5E',
+    name: 'Terracotta Coral',
+    bgPage: 'bg-[#FCF7F6]',
+    cardBg: 'bg-white',
+    cardBorder: 'border-[#F3E7E5]',
+    primaryButton: 'bg-[#9F3A29] hover:bg-[#852E20] text-white shadow-md shadow-[#9F3A29]/20',
+    primaryButtonText: 'text-white',
+    accentText: 'text-[#9F3A29]',
+    badge: 'bg-[#FFF1F2] text-[#9F1239] border-[#FECDD3]',
+    starColor: '#E11D48',
   },
-  neon: {
-    name: 'Electric Neon',
-    badge: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-    bgGradient: 'from-cyan-950/40 via-slate-950 to-black',
-    cardBg: 'bg-gradient-to-b from-slate-900/90 to-slate-950/95',
-    cardBorder: 'border-cyan-500/30 hover:border-cyan-400/60',
-    glowColor: 'rgba(6, 182, 212, 0.25)',
-    accentColor: 'from-cyan-400 via-sky-400 to-blue-500',
-    accentText: 'text-cyan-400',
-    primaryButton: 'bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600 text-slate-950 hover:from-cyan-300 hover:to-sky-400 shadow-cyan-500/25',
-    starColor: '#06B6D4',
+  sage: {
+    name: 'Artisan Sage',
+    bgPage: 'bg-[#F7F9F7]',
+    cardBg: 'bg-white',
+    cardBorder: 'border-[#E3E9E3]',
+    primaryButton: 'bg-[#3A5340] hover:bg-[#2B3F30] text-white shadow-md shadow-[#3A5340]/20',
+    primaryButtonText: 'text-white',
+    accentText: 'text-[#3A5340]',
+    badge: 'bg-[#F0FDF4] text-[#166534] border-[#BBF7D0]',
+    starColor: '#16A34A',
   },
-  obsidian: {
-    name: 'Midnight Chrome',
-    badge: 'bg-slate-700/30 text-slate-200 border-slate-600/40',
-    bgGradient: 'from-slate-900 via-slate-950 to-black',
-    cardBg: 'bg-gradient-to-b from-slate-900/90 to-slate-950/95',
-    cardBorder: 'border-slate-700 hover:border-slate-500',
-    glowColor: 'rgba(148, 163, 184, 0.2)',
-    accentColor: 'from-slate-200 via-zinc-300 to-slate-400',
-    accentText: 'text-slate-200',
-    primaryButton: 'bg-gradient-to-r from-slate-100 to-slate-300 text-slate-950 hover:from-white hover:to-slate-200 shadow-white/20',
-    starColor: '#E2E8F0',
+  classic: {
+    name: 'Modern Charcoal',
+    bgPage: 'bg-[#F8F9FA]',
+    cardBg: 'bg-white',
+    cardBorder: 'border-[#E5E7EB]',
+    primaryButton: 'bg-[#18181B] hover:bg-[#27272A] text-white shadow-md shadow-black/15',
+    primaryButtonText: 'text-white',
+    accentText: 'text-[#18181B]',
+    badge: 'bg-[#F4F4F5] text-[#27272A] border-[#E4E4E7]',
+    starColor: '#EAB308',
   },
 };

@@ -9,17 +9,20 @@ export interface ShopLink {
   featured?: boolean;
 }
 
-export type ShopTheme = 'gold' | 'neon' | 'emerald' | 'sunset' | 'cyber' | 'obsidian';
+export type ShopTheme = 'warm_cafe' | 'gold' | 'emerald' | 'sunset' | 'sage' | 'classic';
 
 export interface Shop {
   id: string;
-  slug: string; // e.g. "royal-cafe"
+  slug: string; // e.g. "urban-cafe"
   name: string;
   tagline: string;
-  category: string;
+  category: string; // e.g. "Café • Bakery • Beverages"
   address?: string;
   description?: string;
   logoUrl: string;
+  coverUrl?: string; // storefront header image
+  mapUrl?: string; // Google Maps visit location link
+  visitButtonText?: string; // e.g. "Visit Our Shop"
   theme: ShopTheme;
   rating: number; // e.g. 4.9
   reviewCount: number; // e.g. 248

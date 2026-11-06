@@ -185,3 +185,4 @@ export function LocalBrandIcon({
       return <WebsiteIcon className={className} size={size} />;
   }
 }
+

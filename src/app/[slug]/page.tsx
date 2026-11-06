@@ -75,3 +75,4 @@ export default async function DynamicShopPage({ params }: ShopPageProps) {
 
   return <ShopPageClient initialShop={shop} />;
 }
+

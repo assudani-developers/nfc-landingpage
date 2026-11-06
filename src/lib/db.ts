@@ -193,3 +193,4 @@ export async function resetToDemoShops(): Promise<Shop[]> {
   }
   return INITIAL_SHOPS;
 }
+
