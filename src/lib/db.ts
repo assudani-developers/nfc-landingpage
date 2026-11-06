@@ -5,19 +5,17 @@ import {
   collection,
   doc,
   getDocs,
-  getDoc,
   setDoc,
   deleteDoc,
   updateDoc,
   increment,
 } from 'firebase/firestore';
 
-const LOCAL_STORAGE_KEY = 'tap_tap_nfc_shops_v1';
+const LOCAL_STORAGE_KEY = 'tap_tap_nfc_shops_v2';
 
-// In-memory cache for server-side or immediate fallback
 let memoryShops: Shop[] = [...INITIAL_SHOPS];
 
-function getLocalShops(): Shop[] {
+export function getLocalShops(): Shop[] {
   if (typeof window === 'undefined') {
     return memoryShops;
   }
@@ -39,11 +37,12 @@ function getLocalShops(): Shop[] {
   }
 }
 
-function saveLocalShops(shops: Shop[]): void {
+export function saveLocalShops(shops: Shop[]): void {
   memoryShops = [...shops];
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(shops));
+      window.dispatchEvent(new Event('shops_updated'));
     } catch (e) {
       console.warn("Could not save to localStorage:", e);
     }
@@ -51,7 +50,7 @@ function saveLocalShops(shops: Shop[]): void {
 }
 
 export async function getShops(): Promise<Shop[]> {
-  // Try Firestore if configured
+  // If Firestore is configured, fetch live from Firestore
   if (isFirebaseConfigured && db) {
     try {
       const colRef = collection(db, 'shops');
@@ -64,25 +63,24 @@ export async function getShops(): Promise<Shop[]> {
         saveLocalShops(fetched);
         return fetched;
       } else {
-        // If Firestore is empty, seed it with INITIAL_SHOPS!
+        // Seed initial shops to Firestore
         for (const s of INITIAL_SHOPS) {
           await setDoc(doc(db, 'shops', s.id), s);
         }
         return INITIAL_SHOPS;
       }
     } catch (err) {
-      console.warn("Firestore getShops failed, falling back to local storage:", err);
+      console.warn("Firestore getShops failed, using local storage:", err);
     }
   }
 
-  // Fallback to local storage / memory
   return getLocalShops();
 }
 
 export async function getShopBySlug(slug: string): Promise<Shop | null> {
   const normalizedSlug = slug.toLowerCase().trim();
 
-  // Try Firestore
+  // Try Firestore first if configured
   if (isFirebaseConfigured && db) {
     try {
       const colRef = collection(db, 'shops');
@@ -94,13 +92,14 @@ export async function getShopBySlug(slug: string): Promise<Shop | null> {
           match = data;
         }
       });
-      if (match) return match;
+      if (match) {
+        return match;
+      }
     } catch (err) {
       console.warn("Firestore getShopBySlug fallback:", err);
     }
   }
 
-  // Local fallback
   const shops = getLocalShops();
   const found = shops.find((s) => s.slug.toLowerCase().trim() === normalizedSlug);
   return found || null;
@@ -116,21 +115,12 @@ export async function saveShop(shop: Shop): Promise<Shop> {
     createdAt: shop.createdAt || now,
     viewsCount: shop.viewsCount || 0,
     tapsCount: shop.tapsCount || 0,
+    showReferral: shop.showReferral !== false,
   };
 
-  // Firestore save
-  if (isFirebaseConfigured && db) {
-    try {
-      const docRef = doc(db, 'shops', shopToSave.id);
-      await setDoc(docRef, shopToSave, { merge: true });
-    } catch (err) {
-      console.warn("Firestore saveShop failed, saving to local store:", err);
-    }
-  }
-
-  // Local sync
+  // 1. Sync to local storage immediately
   const current = getLocalShops();
-  const existingIdx = current.findIndex((s) => s.id === shopToSave.id);
+  const existingIdx = current.findIndex((s) => s.id === shopToSave.id || s.slug === shopToSave.slug);
   let updated: Shop[];
   if (existingIdx >= 0) {
     updated = [...current];
@@ -139,6 +129,16 @@ export async function saveShop(shop: Shop): Promise<Shop> {
     updated = [shopToSave, ...current];
   }
   saveLocalShops(updated);
+
+  // 2. Sync to Firebase Firestore if connected
+  if (isFirebaseConfigured && db) {
+    try {
+      const docRef = doc(db, 'shops', shopToSave.id);
+      await setDoc(docRef, shopToSave, { merge: true });
+    } catch (err) {
+      console.warn("Firestore saveShop failed, saved locally:", err);
+    }
+  }
 
   return shopToSave;
 }
@@ -174,7 +174,7 @@ export async function trackShopTap(slug: string): Promise<void> {
           tapsCount: increment(1),
         });
       } catch (err) {
-        console.warn("Firebase tap track silent fail:", err);
+        // silent
       }
     }
   }
@@ -193,4 +193,3 @@ export async function resetToDemoShops(): Promise<Shop[]> {
   }
   return INITIAL_SHOPS;
 }
-

@@ -14,7 +14,6 @@ import {
   Zap,
 } from 'lucide-react';
 import { WhatsAppIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';
-import { BotanicalLeavesCorner } from '@/components/decorations/LightDecorations';
 
 export const metadata = {
   title: 'Our Other Services | Piyush Assudani - Software & Web Developer',
@@ -23,17 +22,15 @@ export const metadata = {
 
 export default function ServicesPage() {
   return (
-    <div className="min-h-screen w-full bg-[#FAF7F2] text-stone-900 flex flex-col items-center justify-start p-4 sm:p-6 relative overflow-hidden">
-      {/* Background Subtle Leaf */}
-      <div className="fixed bottom-0 left-0 pointer-events-none z-0">
-        <BotanicalLeavesCorner className="w-48 h-48 sm:w-64 sm:h-64" />
-      </div>
-
+    <div
+      className="min-h-screen w-full bg-[#FAF7F2] text-stone-900 flex flex-col items-center justify-start p-4 sm:p-6 relative overflow-hidden selection:bg-amber-200 selection:text-amber-950"
+      suppressHydrationWarning
+    >
       {/* Top Back Navigation */}
       <div className="w-full max-w-md flex items-center justify-between mb-4 z-10 px-2">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 border border-stone-200 text-xs font-semibold text-stone-700 hover:text-stone-950 hover:bg-white shadow-sm transition"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-stone-200 text-xs font-semibold text-stone-700 hover:text-stone-950 shadow-sm transition"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Shop</span>

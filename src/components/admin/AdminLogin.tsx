@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { setAdminLogin } from '@/lib/auth';
 import { NfcWaveIcon } from '@/components/icons/BrandIcons';
-import { BotanicalLeavesCorner } from '@/components/decorations/LightDecorations';
 import {
   Lock,
   User,
@@ -48,12 +47,10 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FAF7F2] text-stone-900 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
-      {/* Background Decorative Leaves */}
-      <div className="fixed bottom-0 left-0 pointer-events-none z-0">
-        <BotanicalLeavesCorner className="w-48 h-48 sm:w-64 sm:h-64" />
-      </div>
-
+    <div
+      className="min-h-screen w-full bg-[#FAF7F2] text-stone-900 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans"
+      suppressHydrationWarning
+    >
       {/* Main Login Card */}
       <div className="w-full max-w-md bg-white border border-[#EDE8E1] rounded-3xl p-8 shadow-xl shadow-stone-200/60 relative z-10">
         {/* Top Branding */}

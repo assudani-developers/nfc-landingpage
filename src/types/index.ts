@@ -15,18 +15,19 @@ export interface Shop {
   id: string;
   slug: string; // e.g. "urban-cafe"
   name: string;
-  tagline: string;
   category: string; // e.g. "Café • Bakery • Beverages"
+  tagline: string; // e.g. "Your neighbourhood café for great coffee, fresh bites and good vibes."
   address?: string;
-  description?: string;
-  logoUrl: string;
-  coverUrl?: string; // storefront header image
-  mapUrl?: string; // Google Maps visit location link
-  visitButtonText?: string; // e.g. "Visit Our Shop"
+  coverUrl: string; // storefront photo
+  logoUrl: string; // shop logo
+  buttonText: string; // e.g. "Visit Our Shop"
+  buttonUrl: string; // Google Maps or website or phone URL
   theme: ShopTheme;
+  themeColor?: string; // e.g. "#5C3A21"
   rating: number; // e.g. 4.9
-  reviewCount: number; // e.g. 248
+  reviewCount: number; // e.g. 384
   links: ShopLink[]; // min 1 (Google review required), max 5
+  showReferral?: boolean; // toggle developer credit & referral
   viewsCount: number;
   tapsCount: number;
   createdAt: number;
