@@ -184,10 +184,13 @@ export async function clearAllShops(): Promise<void> {
   saveLocalShops([]);
 }
 
+// Rate-limiting cache for clicks & visits to prevent spam/abuse
+const lastTrackTimestamps = new Map<string, number>();
+
 /**
  * Comprehensive Click & Referral Tracking per Shop
- * Tracks:
- * - 'visit': NFC tag tapped / shop page opened
+ * With built-in rate-limiting and session deduplication:
+ * - 'visit': NFC tag tapped / shop page opened (1 per session)
  * - 'referral': "Our Other Services & Solutions" or developer referral clicked
  * - 'google_review': Google 5-star review card tapped
  * - 'whatsapp': WhatsApp / Appointment booking button tapped
@@ -198,6 +201,29 @@ export async function clearAllShops(): Promise<void> {
  */
 export async function trackShopAction(slug: string, actionType: string): Promise<void> {
   const normalized = slug.toLowerCase().trim();
+  const rateLimitKey = `${normalized}_${actionType}`;
+  const now = Date.now();
+  const lastTime = lastTrackTimestamps.get(rateLimitKey) || 0;
+
+  // Rate limit: prevent spamming same button within 1.2 seconds
+  if (now - lastTime < 1200) {
+    return;
+  }
+  lastTrackTimestamps.set(rateLimitKey, now);
+
+  // For visit taps: deduplicate within the same browser session
+  if (actionType === 'visit' && typeof window !== 'undefined') {
+    try {
+      const sessionKey = `visited_shop_${normalized}`;
+      if (sessionStorage.getItem(sessionKey)) {
+        return;
+      }
+      sessionStorage.setItem(sessionKey, '1');
+    } catch {
+      // ignore
+    }
+  }
+
   const shops = getLocalShops();
   const shop = shops.find((s) => s.slug.toLowerCase().trim() === normalized);
 

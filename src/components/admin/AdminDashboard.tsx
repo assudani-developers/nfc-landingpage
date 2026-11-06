@@ -10,6 +10,7 @@ import { THEMES } from '@/lib/theme';
 import QRCodeModal from './QRCodeModal';
 import ShopEditModal from './ShopEditModal';
 import ShopAnalyticsModal from './ShopAnalyticsModal';
+import Toast from '@/components/ui/Toast';
 import {
   Plus,
   QrCode,
@@ -32,6 +33,8 @@ import {
   TrendingUp,
   MousePointerClick,
   Sparkles,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -54,8 +57,14 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [showCredsModal, setShowCredsModal] = useState(false);
   const [adminUser, setAdminUser] = useState('');
   const [adminPass, setAdminPass] = useState('');
+  const [showCredPass, setShowCredPass] = useState(false);
   const [savingCreds, setSavingCreds] = useState(false);
   const [credsSavedNotice, setCredsSavedNotice] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ type, message });
+  };
 
   useEffect(() => {
     getOrInitAdminCredentials().then((creds) => {
@@ -70,6 +79,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     await updateAdminCredentialsInDB(adminUser, adminPass);
     setSavingCreds(false);
     setCredsSavedNotice(true);
+    showToast('Admin credentials saved to database!');
     setTimeout(() => {
       setCredsSavedNotice(false);
       setShowCredsModal(false);
@@ -95,33 +105,53 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   }, []);
 
   const handleSaveShop = async (shopToSave: Shop) => {
-    await saveShop(shopToSave);
-    await loadShops();
-    setEditingShop(null);
-    setIsCreatingNew(false);
+    try {
+      await saveShop(shopToSave);
+      await loadShops();
+      setEditingShop(null);
+      setIsCreatingNew(false);
+      showToast(`"${shopToSave.name}" saved successfully!`);
+    } catch (err: unknown) {
+      showToast((err as Error)?.message || 'Failed to save shop', 'error');
+    }
   };
 
   const handleDeleteShop = async (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete "${name}"?`)) {
-      await deleteShop(id);
-      await loadShops();
+      try {
+        await deleteShop(id);
+        await loadShops();
+        showToast(`"${name}" deleted successfully.`, 'info');
+      } catch (err: unknown) {
+        showToast((err as Error)?.message || 'Failed to delete shop', 'error');
+      }
     }
   };
 
   const handleClearAll = async () => {
     if (confirm('Are you sure you want to completely empty the admin panel? All shops will be deleted.')) {
-      await clearAllShops();
-      await loadShops();
+      try {
+        await clearAllShops();
+        await loadShops();
+        showToast('All shops deleted. Admin panel is clean.', 'info');
+      } catch (err: unknown) {
+        showToast((err as Error)?.message || 'Failed to clear shops', 'error');
+      }
     }
   };
 
   const handleResetShopStats = async (id: string) => {
-    await resetShopAnalytics(id);
-    await loadShops();
-    const updated = await getShops();
-    const current = updated.find((s) => s.id === id);
-    if (current) {
-      setAnalyticsShop(current);
+    try {
+      await resetShopAnalytics(id);
+      await loadShops();
+      const updated = await getShops();
+      const current = updated.find((s) => s.id === id);
+      if (current) {
+        setAnalyticsShop(current);
+      }
+      showToast('Click counters reset to zero.', 'info');
+    } catch (err: unknown) {
+      showToast('Failed to reset counters', 'error');
     }
   };
 
@@ -129,6 +159,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     const fullUrl = `${baseUrl}/${slug}`;
     navigator.clipboard.writeText(fullUrl);
     setCopiedId(id);
+    showToast(`URL copied: /${slug}`);
     setTimeout(() => setCopiedId(null), 2500);
   };
 
@@ -678,18 +709,32 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
                 <label className="block text-xs font-semibold text-stone-700 mb-1">
                   Database Password / PIN
                 </label>
-                <input
-                  type="text"
-                  required
-                  name="firestore_admin_pin_field"
-                  autoComplete="off"
-                  data-lpignore="true"
-                  data-1p-ignore="true"
-                  data-form-type="other"
-                  value={adminPass}
-                  onChange={(e) => setAdminPass(e.target.value)}
-                  className="w-full bg-[#FAF7F2] border border-stone-200 rounded-xl px-3.5 py-2 text-sm text-stone-900 font-mono focus:outline-none focus:border-[#5C3A21]"
-                />
+                <div className="relative">
+                  <input
+                    type={showCredPass ? 'text' : 'password'}
+                    required
+                    name="firestore_admin_pin_field"
+                    autoComplete="off"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
+                    data-form-type="other"
+                    value={adminPass}
+                    onChange={(e) => setAdminPass(e.target.value)}
+                    className="w-full bg-[#FAF7F2] border border-stone-200 rounded-xl pl-3.5 pr-10 py-2 text-sm text-stone-900 font-mono focus:outline-none focus:border-[#5C3A21]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCredPass(!showCredPass)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-700 transition"
+                    title={showCredPass ? 'Hide password' : 'Show password'}
+                  >
+                    {showCredPass ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="pt-2 flex justify-end gap-2">
@@ -712,6 +757,14 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
             </form>
           </div>
         </div>
+      )}
+      {/* Floating Action Toast Notification */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );

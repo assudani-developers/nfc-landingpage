@@ -92,14 +92,14 @@ export default function ShopEditModal({
   const [name, setName] = useState(initialShop?.name || '');
   const [slug, setSlug] = useState(initialShop?.slug || '');
   const [tagline, setTagline] = useState(initialShop?.tagline || '');
-  const [category, setCategory] = useState(initialShop?.category || 'Café • Bakery • Beverages');
+  const [category, setCategory] = useState(initialShop?.category || '');
   const [address, setAddress] = useState(initialShop?.address || '');
   const [buttonText, setButtonText] = useState(initialShop?.buttonText || 'Visit Our Shop');
   const [buttonUrl, setButtonUrl] = useState(initialShop?.buttonUrl || '');
   const [themeColor, setThemeColor] = useState(initialShop?.themeColor || '#5C3A21');
   const [showReferral, setShowReferral] = useState(initialShop?.showReferral !== false);
-  const [coverUrl, setCoverUrl] = useState(initialShop?.coverUrl || PRESET_COVERS[0].url);
-  const [logoUrl, setLogoUrl] = useState(initialShop?.logoUrl || PRESET_LOGOS[0].url);
+  const [coverUrl, setCoverUrl] = useState(initialShop?.coverUrl || '');
+  const [logoUrl, setLogoUrl] = useState(initialShop?.logoUrl || '');
   const [theme, setTheme] = useState<ShopTheme>(initialShop?.theme || 'warm_cafe');
 
   // Manage Links: Google Review is mandatory (Link 1). Total links <= 5.
@@ -108,7 +108,7 @@ export default function ShopEditModal({
     type: 'google_review',
     title: 'Google Reviews',
     subtitle: '⭐ Tap to rate 5 stars',
-    url: 'https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4',
+    url: '',
     featured: true,
   };
 
@@ -146,13 +146,13 @@ export default function ShopEditModal({
     switch (type) {
       case 'instagram':
         title = 'Instagram';
-        subtitle = '@yourstore • Daily reels';
-        url = 'https://instagram.com';
+        subtitle = 'Follow us on Instagram';
+        url = '';
         break;
       case 'facebook':
         title = 'Facebook';
-        subtitle = 'Community updates';
-        url = 'https://facebook.com';
+        subtitle = 'Follow our official page';
+        url = '';
         break;
       case 'whatsapp':
         title = 'WhatsApp / Appointment';
@@ -162,12 +162,12 @@ export default function ShopEditModal({
       case 'website':
         title = 'Website';
         subtitle = 'Official site & catalog';
-        url = 'https://example.com';
+        url = '';
         break;
       case 'google_review':
         title = 'Google Reviews';
         subtitle = '⭐ Tap to rate 5 stars';
-        url = 'https://search.google.com/local/writereview';
+        url = '';
         break;
     }
 

@@ -7,6 +7,7 @@ import { LocalBrandIcon } from '@/components/icons/BrandIcons';
 import {
   CurvedWaveMask,
   CoffeeCupIcon,
+  BotanicalBranch,
 } from '@/components/decorations/LightDecorations';
 import {
   MapPin,
@@ -24,6 +25,11 @@ interface ShopPageClientProps {
 
 export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
   const [shop, setShop] = useState<Shop>(initialShop);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Sync with local DB if changes occur in admin
   useEffect(() => {
@@ -84,17 +90,33 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
   const buttonLink = shop.buttonUrl || (shop.address ? `https://maps.google.com/?q=${encodeURIComponent(shop.name + ' ' + shop.address)}` : 'https://maps.google.com');
   const mainButtonBg = shop.themeColor || '#5C3A21';
 
+  if (!mounted) {
+    return (
+      <div
+        className="min-h-screen w-full bg-[#FAF7F2] flex items-center justify-center"
+        suppressHydrationWarning
+      >
+        <div className="w-8 h-8 rounded-full border-2 border-[#5C3A21] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div
       className="min-h-screen w-full bg-[#FAF7F2] text-stone-900 flex flex-col items-center justify-start relative overflow-x-hidden pb-12 selection:bg-amber-200 selection:text-amber-950 font-sans"
       suppressHydrationWarning
     >
       {/* Mobile-First Centered Card Shell */}
-      <div className="w-full max-w-md bg-[#FAF7F2] relative z-10 flex flex-col items-center">
+      <div className="w-full max-w-[420px] bg-[#FAF7F2] relative z-10 flex flex-col items-center sm:my-8 sm:rounded-[38px] sm:shadow-2xl sm:shadow-stone-900/10 sm:border sm:border-[#EDE8E1] overflow-hidden">
+        {/* Subtle Botanical Leaf on Card Bottom Left */}
+        <BotanicalBranch position="bottom-left" className="w-32 h-44 sm:w-40 sm:h-52" />
+
         {/* ============================================================== */}
         {/* 1. STOREFRONT COVER PHOTO WITH CURVED WAVE MASK                */}
         {/* ============================================================== */}
         <div className="relative w-full h-56 sm:h-64 overflow-hidden bg-stone-200">
+          {/* Subtle Botanical Leaf at Top Left */}
+          <BotanicalBranch position="top-left" className="w-24 h-32" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={defaultCoverUrl}
@@ -104,7 +126,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
           {/* Subtle warm gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/35 pointer-events-none" />
 
-          {/* Organic Curved Wave Mask at Bottom */}
+          {/* Organic Curved Wave Mask at Bottom (Upward Dome Crest) */}
           <CurvedWaveMask />
         </div>
 

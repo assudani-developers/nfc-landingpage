@@ -39,8 +39,16 @@ export async function compressAndConvertToBase64(
 
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert to optimized JPEG data URL
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        // Convert to ultra-compact WebP format (with fallback to JPEG)
+        let dataUrl: string;
+        try {
+          dataUrl = canvas.toDataURL('image/webp', quality);
+          if (!dataUrl.startsWith('data:image/webp')) {
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+          }
+        } catch {
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
         resolve(dataUrl);
       };
 
