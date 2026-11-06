@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Shop } from '@/types';
 import { getShops, saveShop, deleteShop, resetToDemoShops } from '@/lib/db';
 import { isFirebaseConfigured, firebaseConfig } from '@/lib/firebase';
-import { logoutAdmin } from '@/lib/auth';
+import { logoutAdmin, updateAdminCredentialsInDB, getOrInitAdminCredentials } from '@/lib/auth';
 import { LocalBrandIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';
 import { THEMES } from '@/lib/theme';
 import QRCodeModal from './QRCodeModal';
@@ -24,6 +24,10 @@ import {
   CheckCircle2,
   Layers,
   Globe,
+  Key,
+  Shield,
+  Save,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -42,6 +46,30 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [qrShop, setQrShop] = useState<Shop | null>(null);
   const [showFirebaseInfo, setShowFirebaseInfo] = useState(false);
+  const [showCredsModal, setShowCredsModal] = useState(false);
+  const [adminUser, setAdminUser] = useState('');
+  const [adminPass, setAdminPass] = useState('');
+  const [savingCreds, setSavingCreds] = useState(false);
+  const [credsSavedNotice, setCredsSavedNotice] = useState(false);
+
+  useEffect(() => {
+    getOrInitAdminCredentials().then((creds) => {
+      setAdminUser(creds.username);
+      setAdminPass(creds.password);
+    });
+  }, []);
+
+  const handleUpdateCreds = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingCreds(true);
+    await updateAdminCredentialsInDB(adminUser, adminPass);
+    setSavingCreds(false);
+    setCredsSavedNotice(true);
+    setTimeout(() => {
+      setCredsSavedNotice(false);
+      setShowCredsModal(false);
+    }, 1500);
+  };
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
 
@@ -149,6 +177,16 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             <span className="sm:hidden">
               {isFirebaseConfigured ? 'Firebase' : 'Local DB'}
             </span>
+          </button>
+
+          {/* Admin Credentials in DB */}
+          <button
+            onClick={() => setShowCredsModal(true)}
+            className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-xs font-semibold flex items-center gap-1.5 transition shadow-xs"
+            title="Manage Admin Login in Database"
+          >
+            <Key className="w-3.5 h-3.5 text-[#5C3A21]" />
+            <span className="hidden sm:inline">DB Login Info</span>
           </button>
 
           {/* Add Shop Button */}
@@ -482,6 +520,87 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
           onSave={handleSaveShop}
           onClose={() => setIsCreatingNew(false)}
         />
+      )}
+
+      {/* Admin DB Credentials Modal */}
+      {showCredsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white border border-[#EDE8E1] rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl relative">
+            <button
+              onClick={() => setShowCredsModal(false)}
+              className="absolute top-5 right-5 p-2 rounded-full bg-stone-100 text-stone-500 hover:text-stone-900 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-[#5C3A21] flex items-center justify-center text-white">
+                <Key className="w-5 h-5 text-amber-200" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-stone-900">
+                  Firestore DB Admin Credentials
+                </h3>
+                <p className="text-xs text-stone-500">
+                  Stored in Firestore collection: <code className="font-mono text-[#5C3A21]">admin_settings</code>
+                </p>
+              </div>
+            </div>
+
+            {credsSavedNotice && (
+              <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 font-medium">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Credentials saved directly to Firestore Database!</span>
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateCreds} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">
+                  Database Username
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={adminUser}
+                  onChange={(e) => setAdminUser(e.target.value)}
+                  className="w-full bg-[#FAF7F2] border border-stone-200 rounded-xl px-3.5 py-2 text-sm text-stone-900 font-mono focus:outline-none focus:border-[#5C3A21]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">
+                  Database Password / PIN
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={adminPass}
+                  onChange={(e) => setAdminPass(e.target.value)}
+                  className="w-full bg-[#FAF7F2] border border-stone-200 rounded-xl px-3.5 py-2 text-sm text-stone-900 font-mono focus:outline-none focus:border-[#5C3A21]"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCredsModal(false)}
+                  className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingCreds}
+                  className="px-4 py-2 rounded-xl bg-[#5C3A21] hover:bg-[#472c19] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingCreds ? 'Updating DB...' : 'Save to Firestore'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { NfcWaveIcon } from '@/components/icons/BrandIcons';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 interface ShopPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -57,16 +59,10 @@ export default async function DynamicShopPage({ params }: ShopPageProps) {
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             href="/"
-            className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition"
+            className="px-5 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-white text-xs font-semibold flex items-center justify-center gap-2 transition"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Go to TapTap NFC Home</span>
-          </Link>
-          <Link
-            href="/admin/piyush"
-            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 transition"
-          >
-            <span>Open Admin Panel</span>
+            <span>Return to Homepage</span>
           </Link>
         </div>
       </div>

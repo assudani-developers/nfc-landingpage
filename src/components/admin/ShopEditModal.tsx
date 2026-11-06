@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Shop, ShopLink, LinkType, ShopTheme } from '@/types';
 import { THEMES } from '@/lib/theme';
 import { LocalBrandIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';
+import { compressAndConvertToBase64 } from '@/lib/imageUtils';
 import {
   X,
   Plus,
@@ -163,29 +164,27 @@ export default function ShopEditModal({
     setLinks(links.filter((l) => l.id !== id));
   };
 
-  const handleCustomLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCustomLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setLogoUrl(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        const base64Data = await compressAndConvertToBase64(file, 400, 400, 0.85);
+        setLogoUrl(base64Data);
+      } catch (err) {
+        console.error('Failed to compress logo:', err);
+      }
     }
   };
 
-  const handleCustomCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCustomCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setCoverUrl(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        const base64Data = await compressAndConvertToBase64(file, 1000, 600, 0.82);
+        setCoverUrl(base64Data);
+      } catch (err) {
+        console.error('Failed to compress cover:', err);
+      }
     }
   };
 

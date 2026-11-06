@@ -1,0 +1,29 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Shops collection: Customers can read, Admin can read & write
+    match /shops/{shopId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // 2. Admin Settings & Credentials: Read and write for admin authentication
+    match /admin_settings/{settingId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // 3. Analytics: Taps and view counters
+    match /analytics/{docId} {
+      allow read, write: if true;
+    }
+
+    // 4. Default rule
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+

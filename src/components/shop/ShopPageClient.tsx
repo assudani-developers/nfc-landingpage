@@ -267,7 +267,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
               (Assudani Developer)
             </div>
 
-            <div className="mt-1 flex items-center gap-1.5 text-[10px] text-stone-400">
+            <div className="mt-1 text-[10px] text-stone-400">
               <a
                 href="https://piyushassudani.in"
                 target="_blank"
@@ -276,10 +276,6 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
               >
                 piyushassudani.in
               </a>
-              <span>•</span>
-              <Link href="/admin/piyush" className="hover:text-stone-700 transition">
-                Admin Portal
-              </Link>
             </div>
           </div>
         )}

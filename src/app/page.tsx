@@ -2,6 +2,8 @@ import { getShops } from '@/lib/db';
 import ShopPageClient from '@/components/shop/ShopPageClient';
 import { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'The Urban Café | TapTap NFC Smart Page',
   description: 'Your neighbourhood café for great coffee, fresh bites and good vibes. Tap to review on Google & connect on WhatsApp.',

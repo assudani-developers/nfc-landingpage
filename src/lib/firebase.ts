@@ -8,6 +8,7 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "",
 };
 
 export const isFirebaseConfigured = Boolean(
@@ -19,16 +20,13 @@ export const isFirebaseConfigured = Boolean(
 let app: FirebaseApp | null = null;
 let db: Firestore | null = null;
 
-if (typeof window !== 'undefined' || isFirebaseConfigured) {
-  try {
-    if (isFirebaseConfigured) {
-      app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-      db = getFirestore(app);
-    }
-  } catch (error) {
-    console.warn("Firebase initialization warning (using local fallback store):", error);
+try {
+  if (isFirebaseConfigured || typeof window !== 'undefined') {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    db = getFirestore(app);
   }
+} catch (error) {
+  console.warn("Firebase initialization warning (using local fallback store):", error);
 }
 
 export { app, db, firebaseConfig };
-

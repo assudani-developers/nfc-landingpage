@@ -15,6 +15,15 @@ const LOCAL_STORAGE_KEY = 'tap_tap_nfc_shops_v2';
 
 let memoryShops: Shop[] = [...INITIAL_SHOPS];
 
+function withTimeout<T>(promise: Promise<T>, ms = 3000): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms)
+    ),
+  ]);
+}
+
 export function getLocalShops(): Shop[] {
   if (typeof window === 'undefined') {
     return memoryShops;
@@ -54,7 +63,7 @@ export async function getShops(): Promise<Shop[]> {
   if (isFirebaseConfigured && db) {
     try {
       const colRef = collection(db, 'shops');
-      const snap = await getDocs(colRef);
+      const snap = await withTimeout(getDocs(colRef), 3000);
       if (!snap.empty) {
         const fetched: Shop[] = [];
         snap.forEach((docItem) => {
@@ -70,7 +79,7 @@ export async function getShops(): Promise<Shop[]> {
         return INITIAL_SHOPS;
       }
     } catch (err) {
-      console.warn("Firestore getShops failed, using local storage:", err);
+      console.warn("Firestore getShops using local storage cache:", (err as Error)?.message);
     }
   }
 
@@ -84,7 +93,7 @@ export async function getShopBySlug(slug: string): Promise<Shop | null> {
   if (isFirebaseConfigured && db) {
     try {
       const colRef = collection(db, 'shops');
-      const snap = await getDocs(colRef);
+      const snap = await withTimeout(getDocs(colRef), 3000);
       let match: Shop | null = null;
       snap.forEach((docItem) => {
         const data = docItem.data() as Shop;
@@ -96,7 +105,7 @@ export async function getShopBySlug(slug: string): Promise<Shop | null> {
         return match;
       }
     } catch (err) {
-      console.warn("Firestore getShopBySlug fallback:", err);
+      console.warn("Firestore getShopBySlug using fallback cache:", (err as Error)?.message);
     }
   }
 
