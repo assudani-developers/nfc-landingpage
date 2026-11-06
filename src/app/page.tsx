@@ -4,13 +4,10 @@ import Link from 'next/link';
 import {
   GoogleReviewIcon,
   WhatsAppIcon,
-  InstagramIcon,
   NfcWaveIcon,
 } from '@/components/icons/BrandIcons';
 import {
   Phone,
-  ArrowRight,
-  CheckCircle2,
   Sparkles,
   Smartphone,
   Star,

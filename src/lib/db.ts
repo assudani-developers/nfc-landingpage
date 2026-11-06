@@ -1,4 +1,4 @@
-import { Shop, ShopClickStats } from '@/types';
+import { Shop } from '@/types';
 import { db, isFirebaseConfigured } from './firebase';
 import { INITIAL_SHOPS } from './initialData';
 import {

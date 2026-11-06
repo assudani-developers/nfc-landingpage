@@ -1,21 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { checkIsAdminAuthenticated } from '@/lib/auth';
 import AdminLogin from '@/components/admin/AdminLogin';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 import { RefreshCw } from 'lucide-react';
+import { useIsClient } from '@/lib/useIsClient';
 
 export default function AdminHubClient() {
-  const [mounted, setMounted] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const isClient = useIsClient();
+  const [sessionAuth, setSessionAuth] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    setIsAuthenticated(checkIsAdminAuthenticated());
-  }, []);
-
-  if (!mounted) {
+  if (!isClient) {
     return (
       <div
         className="min-h-screen w-full bg-[#FAF7F2] flex items-center justify-center text-stone-400"
@@ -26,10 +22,12 @@ export default function AdminHubClient() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <AdminLogin onSuccess={() => setIsAuthenticated(true)} />;
+  const isAuth = sessionAuth || checkIsAdminAuthenticated();
+
+  if (!isAuth) {
+    return <AdminLogin onSuccess={() => setSessionAuth(true)} />;
   }
 
-  return <AdminDashboard onLogout={() => setIsAuthenticated(false)} />;
+  return <AdminDashboard onLogout={() => setSessionAuth(false)} />;
 }
 

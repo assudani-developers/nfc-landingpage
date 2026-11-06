@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Shop } from '@/types';
-import { LocalBrandIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';
+import { LocalBrandIcon } from '@/components/icons/BrandIcons';
 import {
   X,
   TrendingUp,
@@ -12,7 +12,6 @@ import {
   RefreshCw,
   ExternalLink,
   Smartphone,
-  Share2,
 } from 'lucide-react';
 
 interface ShopAnalyticsModalProps {

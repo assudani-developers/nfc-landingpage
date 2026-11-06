@@ -1,8 +1,7 @@
 import { Metadata } from 'next';
-import { getShopBySlug, getShops } from '@/lib/db';
+import { getShopBySlug } from '@/lib/db';
 import ShopPageClient from '@/components/shop/ShopPageClient';
 import Link from 'next/link';
-import { NfcWaveIcon } from '@/components/icons/BrandIcons';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';

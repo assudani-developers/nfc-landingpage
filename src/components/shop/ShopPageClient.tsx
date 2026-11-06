@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Shop, ShopLink } from '@/types';
-import { THEMES } from '@/lib/theme';
 import { LocalBrandIcon } from '@/components/icons/BrandIcons';
 import {
   CurvedWaveMask,
@@ -11,12 +10,11 @@ import {
 } from '@/components/decorations/LightDecorations';
 import {
   MapPin,
-  ExternalLink,
   ChevronRight,
-  Globe,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { trackShopAction, getLocalShops } from '@/lib/db';
+import { useIsClient } from '@/lib/useIsClient';
 import Link from 'next/link';
 
 interface ShopPageClientProps {
@@ -25,11 +23,7 @@ interface ShopPageClientProps {
 
 export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
   const [shop, setShop] = useState<Shop>(initialShop);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsClient();
 
   // Sync with local DB if changes occur in admin
   useEffect(() => {
@@ -57,8 +51,6 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
       window.removeEventListener('storage', handleUpdate);
     };
   }, [initialShop.slug, initialShop.id, shop.slug]);
-
-  const theme = THEMES[shop.theme] || THEMES.warm_cafe;
 
   // Handle any link click with tracking (and confetti for Google Review)
   const handleLinkClick = (e: React.MouseEvent, link: ShopLink) => {

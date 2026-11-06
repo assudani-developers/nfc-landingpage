@@ -6,11 +6,8 @@ import {
   ExternalLink,
   Code2,
   Smartphone,
-  Layers,
-  Sparkles,
   CheckCircle2,
   Phone,
-  Mail,
   Zap,
 } from 'lucide-react';
 import { WhatsAppIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';

@@ -9,10 +9,8 @@ import {
   Copy,
   Check,
   ExternalLink,
-  MapPin,
 } from 'lucide-react';
 import { NfcWaveIcon, GoogleReviewIcon } from '@/components/icons/BrandIcons';
-import { CurvedWaveMask } from '@/components/decorations/LightDecorations';
 
 interface QRCodeModalProps {
   shop: Shop;

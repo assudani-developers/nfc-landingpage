@@ -6,7 +6,6 @@ import { getShops, saveShop, deleteShop, clearAllShops, resetShopAnalytics } fro
 import { isFirebaseConfigured, firebaseConfig } from '@/lib/firebase';
 import { logoutAdmin, updateAdminCredentialsInDB, getOrInitAdminCredentials } from '@/lib/auth';
 import { LocalBrandIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';
-import { THEMES } from '@/lib/theme';
 import QRCodeModal from './QRCodeModal';
 import ShopEditModal from './ShopEditModal';
 import ShopAnalyticsModal from './ShopAnalyticsModal';
@@ -27,12 +26,9 @@ import {
   Layers,
   Globe,
   Key,
-  Shield,
   Save,
   X,
   TrendingUp,
-  MousePointerClick,
-  Sparkles,
   Eye,
   EyeOff,
 } from 'lucide-react';
@@ -89,8 +85,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
 
   const loadShops = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const data = await getShops();
       setShops(data);
     } catch (err) {
@@ -101,7 +97,24 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   };
 
   useEffect(() => {
-    loadShops();
+    let active = true;
+    getShops()
+      .then((data) => {
+        if (active) {
+          setShops(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          console.error('Failed to load shops:', err);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleSaveShop = async (shopToSave: Shop) => {
@@ -150,7 +163,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         setAnalyticsShop(current);
       }
       showToast('Click counters reset to zero.', 'info');
-    } catch (err: unknown) {
+    } catch {
       showToast('Failed to reset counters', 'error');
     }
   };
@@ -415,7 +428,6 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredShops.map((shop) => {
-              const fullShopUrl = `${baseUrl}/${shop.slug}`;
               const isCopied = copiedId === shop.id;
 
               return (

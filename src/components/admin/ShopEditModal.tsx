@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Shop, ShopLink, LinkType, ShopTheme } from '@/types';
-import { THEMES } from '@/lib/theme';
 import { LocalBrandIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';
 import { compressAndConvertToBase64 } from '@/lib/imageUtils';
 import {
@@ -12,13 +11,10 @@ import {
   Save,
   Link as LinkIcon,
   AlertCircle,
-  Image as ImageIcon,
-  Check,
-  MapPin,
   Palette,
-  Eye,
   Upload,
   Camera,
+  ImageIcon,
 } from 'lucide-react';
 
 interface ShopEditModalProps {
@@ -43,24 +39,36 @@ const PRESET_COVERS = [
   { label: 'Boutique Fashion Front', url: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=900&auto=format&fit=crop&q=80' },
 ];
 
-const COLOR_PRESETS = [
-  { name: 'Warm Cafe', color: '#5C3A21' },
-  { name: 'Caramel Amber', color: '#854D0E' },
-  { name: 'Forest Matcha', color: '#1E4D36' },
-  { name: 'Terracotta', color: '#9F3A29' },
-  { name: 'Modern Charcoal', color: '#18181B' },
-  { name: 'Royal Indigo', color: '#1E3A8A' },
+const COLOR_PRESETS: { name: string; color: string; theme: ShopTheme }[] = [
+  { name: 'Warm Cafe', color: '#5C3A21', theme: 'warm_cafe' },
+  { name: 'Caramel Amber', color: '#854D0E', theme: 'gold' },
+  { name: 'Forest Matcha', color: '#1E4D36', theme: 'emerald' },
+  { name: 'Terracotta', color: '#9F3A29', theme: 'sunset' },
+  { name: 'Modern Charcoal', color: '#18181B', theme: 'classic' },
+  { name: 'Royal Indigo', color: '#1E3A8A', theme: 'classic' },
 ];
 
-// Helper functions to parse and build WhatsApp appointment links
+// Helper functions for clean Indian 10-digit WhatsApp phone numbers
+function extractCleanIndianPhone(input: string): string {
+  let digits = input.replace(/\D/g, '');
+  if (digits.startsWith('91') && digits.length > 10) {
+    digits = digits.slice(2);
+  }
+  return digits.slice(0, 10);
+}
+
 function parseWhatsAppUrl(url: string) {
   try {
-    const raw = url.replace(/^(https?:\/\/)?(wa\.me\/)/i, '');
+    if (!url) return { phone: '', msg: '' };
+    const raw = url.replace(/^(https?:\/\/)?(wa\.me\/|api\.whatsapp\.com\/send\?phone=)/i, '');
     const [numPart, query] = raw.split('?');
-    let phone = numPart ? numPart.replace(/[^0-9]/g, '') : '';
-    if (phone.startsWith('91') && phone.length === 12) {
+    let phone = numPart ? numPart.replace(/\D/g, '') : '';
+    // Strip leading 91 (country code) so input shows only the 10-digit mobile number
+    if (phone.startsWith('91')) {
       phone = phone.slice(2);
     }
+    phone = phone.slice(0, 10);
+
     let msg = '';
     if (query) {
       const searchParams = new URLSearchParams(query);
@@ -73,13 +81,28 @@ function parseWhatsAppUrl(url: string) {
 }
 
 function buildWhatsAppUrl(phone: string, msg?: string) {
-  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  const cleanPhone = extractCleanIndianPhone(phone);
   if (!cleanPhone) return 'https://wa.me/';
-  const fullPhone = cleanPhone.startsWith('91') && cleanPhone.length === 12 ? cleanPhone : `91${cleanPhone}`;
+  const fullPhone = `91${cleanPhone}`;
   if (msg && msg.trim()) {
     return `https://wa.me/${fullPhone}?text=${encodeURIComponent(msg.trim())}`;
   }
   return `https://wa.me/${fullPhone}`;
+}
+
+const DEFAULT_GOOGLE_REVIEW_LINK: ShopLink = {
+  id: 'link-review-default',
+  type: 'google_review',
+  title: 'Google Reviews',
+  subtitle: '⭐ Tap to rate 5 stars',
+  url: '',
+  featured: true,
+};
+
+let uniqueLinkSequence = 0;
+function getNextLinkId(type: string): string {
+  uniqueLinkSequence += 1;
+  return `link-${type}-${uniqueLinkSequence}`;
 }
 
 export default function ShopEditModal({
@@ -102,19 +125,9 @@ export default function ShopEditModal({
   const [logoUrl, setLogoUrl] = useState(initialShop?.logoUrl || '');
   const [theme, setTheme] = useState<ShopTheme>(initialShop?.theme || 'warm_cafe');
 
-  // Manage Links: Google Review is mandatory (Link 1). Total links <= 5.
-  const defaultGoogleReviewLink: ShopLink = {
-    id: `link-review-${Date.now()}`,
-    type: 'google_review',
-    title: 'Google Reviews',
-    subtitle: '⭐ Tap to rate 5 stars',
-    url: '',
-    featured: true,
-  };
-
   const initialLinks = initialShop?.links && initialShop.links.length > 0
     ? initialShop.links
-    : [defaultGoogleReviewLink];
+    : [DEFAULT_GOOGLE_REVIEW_LINK];
 
   const [links, setLinks] = useState<ShopLink[]>(initialLinks);
   const [error, setError] = useState<string | null>(null);
@@ -155,9 +168,9 @@ export default function ShopEditModal({
         url = '';
         break;
       case 'whatsapp':
-        title = 'WhatsApp / Appointment';
+        title = 'WhatsApp';
         subtitle = 'Book appointment & inquiries';
-        url = 'https://wa.me/91';
+        url = 'https://wa.me/';
         break;
       case 'website':
         title = 'Website';
@@ -172,7 +185,7 @@ export default function ShopEditModal({
     }
 
     const newLink: ShopLink = {
-      id: `link-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      id: getNextLinkId(type),
       type,
       title,
       subtitle,
@@ -421,6 +434,24 @@ export default function ShopEditModal({
 
             <div>
               <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                Store Location / Address (Optional)
+              </label>
+              <input
+                type="text"
+                name="biz_shop_address"
+                autoComplete="off"
+                data-lpignore="true"
+                data-1p-ignore="true"
+                data-form-type="other"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="e.g. Main Market, City"
+                className="w-full bg-[#FAF7F2] border border-stone-200 rounded-xl px-3.5 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#5C3A21] focus:bg-white transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 mb-1.5">
                 Bottom Main Button Text
               </label>
               <input
@@ -471,7 +502,10 @@ export default function ShopEditModal({
                 <button
                   type="button"
                   key={preset.color}
-                  onClick={() => setThemeColor(preset.color)}
+                  onClick={() => {
+                    setThemeColor(preset.color);
+                    setTheme(preset.theme);
+                  }}
                   className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-2 transition ${
                     themeColor === preset.color
                       ? 'border-stone-800 bg-white ring-1 ring-stone-800'
@@ -792,14 +826,15 @@ export default function ShopEditModal({
                           <div>
                             <label className="text-[10px] text-stone-700 block mb-0.5 font-bold flex items-center justify-between">
                               <span>WhatsApp Phone Number (For Appointments &amp; Orders) *</span>
-                              <span className="text-emerald-700 font-semibold text-[10px]">Only Phone Number Required</span>
+                              <span className="text-emerald-700 font-semibold text-[10px]">10-Digit Mobile Number</span>
                             </label>
                             <div className="flex items-center bg-white border border-stone-200 rounded-lg overflow-hidden focus-within:border-[#5C3A21]">
-                              <span className="px-2.5 py-1.5 bg-stone-100 border-r border-stone-200 text-xs font-bold text-stone-700">
+                              <span className="px-2.5 py-1.5 bg-stone-100 border-r border-stone-200 text-xs font-bold text-stone-700 select-none">
                                 🇮🇳 +91
                               </span>
                               <input
                                 type="tel"
+                                maxLength={10}
                                 required
                                 name={`link_wp_phone_${link.id}`}
                                 autoComplete="off"
@@ -809,10 +844,10 @@ export default function ShopEditModal({
                                 value={parseWhatsAppUrl(link.url).phone}
                                 onChange={(e) => {
                                   const currentMsg = parseWhatsAppUrl(link.url).msg;
-                                  const newPhone = e.target.value.replace(/[^0-9]/g, '');
-                                  handleUpdateLink(link.id, { url: buildWhatsAppUrl(newPhone, currentMsg) });
+                                  const cleanTyped = extractCleanIndianPhone(e.target.value);
+                                  handleUpdateLink(link.id, { url: buildWhatsAppUrl(cleanTyped, currentMsg) });
                                 }}
-                                placeholder="e.g. 9413879444"
+                                placeholder="Enter 10-digit number (e.g. 9413879444)"
                                 className="w-full px-2.5 py-1.5 text-xs text-stone-900 font-mono font-bold focus:outline-none"
                               />
                             </div>
