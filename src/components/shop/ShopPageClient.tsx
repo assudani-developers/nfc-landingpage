@@ -15,7 +15,7 @@ import {
   Globe,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { trackShopTap, getLocalShops } from '@/lib/db';
+import { trackShopAction, getLocalShops } from '@/lib/db';
 import Link from 'next/link';
 
 interface ShopPageClientProps {
@@ -43,7 +43,8 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
     window.addEventListener('shops_updated', handleUpdate);
     window.addEventListener('storage', handleUpdate);
 
-    trackShopTap(shop.slug);
+    // Track visit
+    trackShopAction(shop.slug, 'visit');
 
     return () => {
       window.removeEventListener('shops_updated', handleUpdate);
@@ -53,22 +54,26 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
 
   const theme = THEMES[shop.theme] || THEMES.warm_cafe;
 
-  // Handle Google Review click with confetti celebration
-  const handleReviewClick = (e: React.MouseEvent, url: string) => {
-    e.preventDefault();
-    try {
-      confetti({
-        particleCount: 65,
-        spread: 60,
-        origin: { y: 0.65 },
-        colors: ['#EA4335', '#4285F4', '#FBBC05', '#34A853', '#5C3A21'],
-      });
-    } catch {
-      // ignore
+  // Handle any link click with tracking (and confetti for Google Review)
+  const handleLinkClick = (e: React.MouseEvent, link: ShopLink) => {
+    trackShopAction(shop.slug, link.type);
+
+    if (link.type === 'google_review') {
+      e.preventDefault();
+      try {
+        confetti({
+          particleCount: 65,
+          spread: 60,
+          origin: { y: 0.65 },
+          colors: ['#EA4335', '#4285F4', '#FBBC05', '#34A853', '#5C3A21'],
+        });
+      } catch {
+        // ignore
+      }
+      setTimeout(() => {
+        window.open(link.url, '_blank', 'noopener,noreferrer');
+      }, 320);
     }
-    setTimeout(() => {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }, 320);
   };
 
   // Group links: first 3 links for top row, remaining 2 for bottom row (max 5 links)
@@ -159,27 +164,23 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
                   : 'grid-cols-3'
               }`}
             >
-              {firstRowLinks.map((link: ShopLink) => {
-                const isGoogle = link.type === 'google_review';
-
-                return (
-                  <a
-                    key={link.id}
-                    href={link.url}
-                    onClick={isGoogle ? (e) => handleReviewClick(e, link.url) : undefined}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group bg-white hover:bg-[#FDFCFB] border border-[#EDE8E1] rounded-3xl p-3.5 sm:p-4 flex flex-col items-center justify-center aspect-square shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200"
-                  >
-                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                      <LocalBrandIcon type={link.type} className="w-8 h-8 sm:w-9 sm:h-9" />
-                    </div>
-                    <span className="text-[11px] sm:text-xs font-bold text-stone-900 text-center leading-tight">
-                      {link.title}
-                    </span>
-                  </a>
-                );
-              })}
+              {firstRowLinks.map((link: ShopLink) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  onClick={(e) => handleLinkClick(e, link)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group bg-white hover:bg-[#FDFCFB] border border-[#EDE8E1] rounded-3xl p-3.5 sm:p-4 flex flex-col items-center justify-center aspect-square shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200"
+                >
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                    <LocalBrandIcon type={link.type} className="w-8 h-8 sm:w-9 sm:h-9" />
+                  </div>
+                  <span className="text-[11px] sm:text-xs font-bold text-stone-900 text-center leading-tight">
+                    {link.title}
+                  </span>
+                </a>
+              ))}
             </div>
           )}
 
@@ -192,27 +193,23 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
                   : 'grid-cols-2 max-w-[240px] sm:max-w-[260px] mx-auto'
               }`}
             >
-              {secondRowLinks.map((link: ShopLink) => {
-                const isGoogle = link.type === 'google_review';
-
-                return (
-                  <a
-                    key={link.id}
-                    href={link.url}
-                    onClick={isGoogle ? (e) => handleReviewClick(e, link.url) : undefined}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group bg-white hover:bg-[#FDFCFB] border border-[#EDE8E1] rounded-3xl p-3.5 sm:p-4 flex flex-col items-center justify-center aspect-square shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 min-w-[100px]"
-                  >
-                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                      <LocalBrandIcon type={link.type} className="w-8 h-8 sm:w-9 sm:h-9" />
-                    </div>
-                    <span className="text-[11px] sm:text-xs font-bold text-stone-900 text-center leading-tight">
-                      {link.title}
-                    </span>
-                  </a>
-                );
-              })}
+              {secondRowLinks.map((link: ShopLink) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  onClick={(e) => handleLinkClick(e, link)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group bg-white hover:bg-[#FDFCFB] border border-[#EDE8E1] rounded-3xl p-3.5 sm:p-4 flex flex-col items-center justify-center aspect-square shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 min-w-[100px]"
+                >
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                    <LocalBrandIcon type={link.type} className="w-8 h-8 sm:w-9 sm:h-9" />
+                  </div>
+                  <span className="text-[11px] sm:text-xs font-bold text-stone-900 text-center leading-tight">
+                    {link.title}
+                  </span>
+                </a>
+              ))}
             </div>
           )}
         </div>
@@ -223,6 +220,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
         <div className="w-full px-6 mt-6 z-10">
           <a
             href={buttonLink}
+            onClick={() => trackShopAction(shop.slug, 'main_button')}
             target="_blank"
             rel="noopener noreferrer"
             style={{ backgroundColor: mainButtonBg }}
@@ -241,6 +239,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
             {/* Our Other Services Referral Link */}
             <Link
               href="/services"
+              onClick={() => trackShopAction(shop.slug, 'referral')}
               className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-stone-50 border border-[#EDE8E1] text-xs font-semibold text-stone-800 shadow-sm flex items-center justify-between transition group mb-3 hover:border-stone-300 active:scale-[0.99]"
             >
               <div className="flex items-center gap-2">
@@ -258,6 +257,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
               Designed &amp; Developed by{' '}
               <a
                 href="https://piyushassudani.in"
+                onClick={() => trackShopAction(shop.slug, 'referral')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-bold text-[#5C3A21] hover:underline"
@@ -271,6 +271,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
             <div className="mt-1.5 flex items-center justify-center gap-2 sm:gap-2.5 text-[11px] text-stone-500 font-medium flex-wrap">
               <a
                 href="tel:+919413879444"
+                onClick={() => trackShopAction(shop.slug, 'referral')}
                 className="inline-flex items-center gap-1 text-[#5C3A21] hover:underline font-semibold"
               >
                 <span>📞 +91 9413879444</span>
@@ -278,6 +279,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
               <span className="text-stone-300">•</span>
               <a
                 href="https://wa.me/919413879444?text=Hello%20Piyush%2C%20I%20saw%20your%20NFC%20project%20and%20want%20to%20connect."
+                onClick={() => trackShopAction(shop.slug, 'referral')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-emerald-700 hover:underline font-semibold"
@@ -287,6 +289,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
               <span className="text-stone-300">•</span>
               <a
                 href="https://piyushassudani.in"
+                onClick={() => trackShopAction(shop.slug, 'referral')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-stone-600 hover:text-stone-900 hover:underline font-medium"

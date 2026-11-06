@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Shop } from '@/types';
-import { getShops, saveShop, deleteShop, resetToDemoShops } from '@/lib/db';
+import { getShops, saveShop, deleteShop, clearAllShops, resetShopAnalytics } from '@/lib/db';
 import { isFirebaseConfigured, firebaseConfig } from '@/lib/firebase';
 import { logoutAdmin, updateAdminCredentialsInDB, getOrInitAdminCredentials } from '@/lib/auth';
 import { LocalBrandIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';
 import { THEMES } from '@/lib/theme';
 import QRCodeModal from './QRCodeModal';
 import ShopEditModal from './ShopEditModal';
+import ShopAnalyticsModal from './ShopAnalyticsModal';
 import {
   Plus,
   QrCode,
@@ -28,6 +29,9 @@ import {
   Shield,
   Save,
   X,
+  TrendingUp,
+  MousePointerClick,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -45,6 +49,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [editingShop, setEditingShop] = useState<Shop | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [qrShop, setQrShop] = useState<Shop | null>(null);
+  const [analyticsShop, setAnalyticsShop] = useState<Shop | null>(null);
   const [showFirebaseInfo, setShowFirebaseInfo] = useState(false);
   const [showCredsModal, setShowCredsModal] = useState(false);
   const [adminUser, setAdminUser] = useState('');
@@ -103,10 +108,20 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
-  const handleResetData = async () => {
-    if (confirm('Reset all shops to standard sample shops?')) {
-      await resetToDemoShops();
+  const handleClearAll = async () => {
+    if (confirm('Are you sure you want to completely empty the admin panel? All shops will be deleted.')) {
+      await clearAllShops();
       await loadShops();
+    }
+  };
+
+  const handleResetShopStats = async (id: string) => {
+    await resetShopAnalytics(id);
+    await loadShops();
+    const updated = await getShops();
+    const current = updated.find((s) => s.id === id);
+    if (current) {
+      setAnalyticsShop(current);
     }
   };
 
@@ -125,7 +140,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   );
 
   const totalTaps = shops.reduce((acc, s) => acc + (s.tapsCount || 0), 0);
-  const totalViews = shops.reduce((acc, s) => acc + (s.viewsCount || 0), 0);
+  const totalReferrals = shops.reduce((acc, s) => acc + (s.referralClicks || 0), 0);
+  const totalActionClicks = shops.reduce((acc, s) => {
+    const stats = s.clickStats || {};
+    const sum = Object.values(stats).reduce((a: number, b) => a + (Number(b) || 0), 0);
+    return acc + sum;
+  }, 0);
 
   return (
     <div className="min-h-screen w-full bg-[#FAF7F2] text-stone-900 flex flex-col font-sans">
@@ -188,6 +208,18 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             <Key className="w-3.5 h-3.5 text-[#5C3A21]" />
             <span className="hidden sm:inline">DB Login Info</span>
           </button>
+
+          {/* Clear All Shops Button */}
+          {shops.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              className="px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center gap-1.5 transition"
+              title="Delete all demo shops to make panel completely empty"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Empty Panel</span>
+            </button>
+          )}
 
           {/* Add Shop Button */}
           <button
@@ -252,11 +284,11 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
 
             <div className="flex items-center gap-3">
               <button
-                onClick={handleResetData}
-                className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-xs font-medium text-stone-700 flex items-center gap-1.5 transition"
+                onClick={handleClearAll}
+                className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center gap-1.5 border border-rose-200 transition"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Reset Demo Shops</span>
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Empty All Shops</span>
               </button>
               <button
                 onClick={loadShops}
@@ -284,15 +316,15 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
           </div>
 
           <div className="p-4 rounded-2xl bg-white border border-[#EDE8E1] shadow-sm">
-            <span className="text-xs text-stone-500 block mb-1">Total Page Views</span>
-            <div className="text-2xl font-black text-stone-900">{totalViews}</div>
-            <span className="text-[11px] text-stone-500">QR scans &amp; web visits</span>
+            <span className="text-xs text-stone-500 block mb-1">Button &amp; Link Clicks</span>
+            <div className="text-2xl font-black text-blue-700">{totalActionClicks}</div>
+            <span className="text-[11px] text-stone-500">Reviews, WhatsApp, etc.</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border border-[#EDE8E1] shadow-sm">
-            <span className="text-xs text-stone-500 block mb-1">Theme Mode</span>
-            <div className="text-2xl font-black text-[#5C3A21]">Light</div>
-            <span className="text-[11px] text-[#8C6239] font-medium">Warm Ivory &amp; Cream</span>
+          <div className="p-4 rounded-2xl bg-purple-50 border border-purple-200 shadow-sm">
+            <span className="text-xs text-purple-700 block mb-1 font-bold">Referral Clicks</span>
+            <div className="text-2xl font-black text-purple-900">{totalReferrals}</div>
+            <span className="text-[11px] text-purple-700 font-semibold">Piyush Assudani Portfolio</span>
           </div>
         </div>
 
@@ -327,18 +359,27 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
             <p className="text-xs">Loading shop directory...</p>
           </div>
         ) : filteredShops.length === 0 ? (
-          <div className="py-16 text-center rounded-3xl border border-dashed border-stone-300 bg-white p-8">
-            <NfcWaveIcon className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-stone-800 mb-1">No Shops Found</h3>
-            <p className="text-xs text-stone-500 mb-4">
-              {searchQuery ? 'No shops match your search query.' : 'Add your first NFC shop card to get started!'}
+          <div className="py-20 text-center rounded-3xl border-2 border-dashed border-[#EDE8E1] bg-white p-8 max-w-lg mx-auto shadow-sm">
+            <div className="w-16 h-16 rounded-3xl bg-[#FAF7F2] border border-[#E5DACD] flex items-center justify-center mx-auto mb-4">
+              <NfcWaveIcon className="w-8 h-8 text-[#5C3A21]" />
+            </div>
+            <h3 className="text-lg font-bold text-stone-900 mb-1">
+              {searchQuery ? 'No matching shops found' : 'Admin Panel is Clean & Empty'}
+            </h3>
+            <p className="text-xs text-stone-500 mb-5 max-w-xs mx-auto leading-relaxed">
+              {searchQuery
+                ? 'Try a different search keyword.'
+                : 'Zero demo shops. Ready to add your clients! Click the button below to create your first NFC shop card.'}
             </p>
-            <button
-              onClick={() => setIsCreatingNew(true)}
-              className="py-2 px-4 rounded-xl bg-[#5C3A21] text-white font-bold text-xs hover:bg-[#472c19] transition"
-            >
-              Add First Shop
-            </button>
+            {!searchQuery && (
+              <button
+                onClick={() => setIsCreatingNew(true)}
+                className="py-2.5 px-5 rounded-xl bg-[#5C3A21] hover:bg-[#472c19] text-white font-bold text-xs flex items-center gap-2 mx-auto transition shadow-md shadow-[#5C3A21]/20 active:scale-95"
+              >
+                <Plus className="w-4 h-4 text-amber-200" />
+                <span>Add First Shop Card</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -393,9 +434,40 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
                     </div>
 
                     {/* Tagline */}
-                    <p className="text-xs text-stone-600 line-clamp-2 mb-3.5">
+                    <p className="text-xs text-stone-600 line-clamp-2 mb-3">
                       {shop.tagline}
                     </p>
+
+                    {/* LIVE CLICKS & REFERRAL STATS PILL */}
+                    <div className="grid grid-cols-3 gap-2 p-2 rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] mb-3 text-center">
+                      <div>
+                        <span className="text-[9px] text-stone-500 font-bold block uppercase tracking-wider">
+                          Visits
+                        </span>
+                        <span className="text-xs font-black text-stone-900">
+                          {shop.tapsCount || 0}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-blue-600 font-bold block uppercase tracking-wider">
+                          Clicks
+                        </span>
+                        <span className="text-xs font-black text-blue-700">
+                          {Object.values(shop.clickStats || {}).reduce(
+                            (a: number, b) => a + (Number(b) || 0),
+                            0
+                          )}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-purple-700 font-bold block uppercase tracking-wider">
+                          Referrals
+                        </span>
+                        <span className="text-xs font-black text-purple-800">
+                          {shop.referralClicks || 0}
+                        </span>
+                      </div>
+                    </div>
 
                     {/* CUSTOM URL DISPLAY BOX */}
                     <div className="p-2.5 rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] mb-3.5 flex items-center justify-between gap-2">
@@ -448,8 +520,18 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
                   </div>
 
                   {/* Actions Footer */}
-                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
+                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {/* Analytics Button */}
+                      <button
+                        onClick={() => setAnalyticsShop(shop)}
+                        className="py-1.5 px-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-900 text-xs font-bold flex items-center gap-1.5 transition"
+                        title="View Detailed Click & Referral Breakdown"
+                      >
+                        <TrendingUp className="w-3.5 h-3.5 text-purple-700" />
+                        <span>Analytics</span>
+                      </button>
+
                       {/* Standee QR Modal Button */}
                       <button
                         onClick={() => setQrShop(shop)}
@@ -457,7 +539,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
                         title="Generate QR code and printable standee"
                       >
                         <QrCode className="w-3.5 h-3.5 text-[#8C6239]" />
-                        <span>QR Standee</span>
+                        <span>QR</span>
                       </button>
 
                       {/* Open Customer Shop Page */}
@@ -502,6 +584,15 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id`}
       {/* QR Code Standee Modal */}
       {qrShop && (
         <QRCodeModal shop={qrShop} onClose={() => setQrShop(null)} />
+      )}
+
+      {/* Analytics Breakdown Modal */}
+      {analyticsShop && (
+        <ShopAnalyticsModal
+          shop={analyticsShop}
+          onClose={() => setAnalyticsShop(null)}
+          onReset={() => handleResetShopStats(analyticsShop.id)}
+        />
       )}
 
       {/* Edit Shop Modal */}

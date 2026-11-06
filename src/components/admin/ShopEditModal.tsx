@@ -52,6 +52,36 @@ const COLOR_PRESETS = [
   { name: 'Royal Indigo', color: '#1E3A8A' },
 ];
 
+// Helper functions to parse and build WhatsApp appointment links
+function parseWhatsAppUrl(url: string) {
+  try {
+    const raw = url.replace(/^(https?:\/\/)?(wa\.me\/)/i, '');
+    const [numPart, query] = raw.split('?');
+    let phone = numPart ? numPart.replace(/[^0-9]/g, '') : '';
+    if (phone.startsWith('91') && phone.length === 12) {
+      phone = phone.slice(2);
+    }
+    let msg = '';
+    if (query) {
+      const searchParams = new URLSearchParams(query);
+      msg = searchParams.get('text') || '';
+    }
+    return { phone, msg };
+  } catch {
+    return { phone: '', msg: '' };
+  }
+}
+
+function buildWhatsAppUrl(phone: string, msg?: string) {
+  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  if (!cleanPhone) return 'https://wa.me/';
+  const fullPhone = cleanPhone.startsWith('91') && cleanPhone.length === 12 ? cleanPhone : `91${cleanPhone}`;
+  if (msg && msg.trim()) {
+    return `https://wa.me/${fullPhone}?text=${encodeURIComponent(msg.trim())}`;
+  }
+  return `https://wa.me/${fullPhone}`;
+}
+
 export default function ShopEditModal({
   initialShop,
   onSave,
@@ -125,9 +155,9 @@ export default function ShopEditModal({
         url = 'https://facebook.com';
         break;
       case 'whatsapp':
-        title = 'WhatsApp';
-        subtitle = 'Chat & reservations';
-        url = 'https://wa.me/919876543210';
+        title = 'WhatsApp / Appointment';
+        subtitle = 'Book appointment & inquiries';
+        url = 'https://wa.me/91';
         break;
       case 'website':
         title = 'Website';
@@ -205,6 +235,15 @@ export default function ShopEditModal({
     if (!googleReview || !googleReview.url.trim()) {
       setError('A valid Google Review URL is required (mandatory link).');
       return;
+    }
+
+    const whatsappLink = links.find((l) => l.type === 'whatsapp');
+    if (whatsappLink) {
+      const parsed = parseWhatsAppUrl(whatsappLink.url);
+      if (!parsed.phone || parsed.phone.length < 7) {
+        setError('Please enter a valid WhatsApp mobile number for appointments.');
+        return;
+      }
     }
 
     if (links.length > 5) {
@@ -748,24 +787,78 @@ export default function ShopEditModal({
                           className="w-full bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs text-stone-900 focus:outline-none focus:border-[#5C3A21]"
                         />
                       </div>
-                      <div className="sm:col-span-2">
-                        <label className="text-[10px] text-stone-500 block mb-0.5 font-medium">
-                          Destination Link URL
-                        </label>
-                        <input
-                          type="url"
-                          required
-                          name={`link_url_${link.id}`}
-                          autoComplete="off"
-                          data-lpignore="true"
-                          data-1p-ignore="true"
-                          data-form-type="other"
-                          value={link.url}
-                          onChange={(e) => handleUpdateLink(link.id, { url: e.target.value })}
-                          placeholder={isGoogleReview ? 'https://search.google.com/local/writereview?placeid=...' : 'https://...'}
-                          className="w-full bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs text-stone-900 font-mono focus:outline-none focus:border-[#5C3A21]"
-                        />
-                      </div>
+                      {link.type === 'whatsapp' ? (
+                        <div className="sm:col-span-2 space-y-2">
+                          <div>
+                            <label className="text-[10px] text-stone-700 block mb-0.5 font-bold flex items-center justify-between">
+                              <span>WhatsApp Phone Number (For Appointments &amp; Orders) *</span>
+                              <span className="text-emerald-700 font-semibold text-[10px]">Only Phone Number Required</span>
+                            </label>
+                            <div className="flex items-center bg-white border border-stone-200 rounded-lg overflow-hidden focus-within:border-[#5C3A21]">
+                              <span className="px-2.5 py-1.5 bg-stone-100 border-r border-stone-200 text-xs font-bold text-stone-700">
+                                🇮🇳 +91
+                              </span>
+                              <input
+                                type="tel"
+                                required
+                                name={`link_wp_phone_${link.id}`}
+                                autoComplete="off"
+                                data-lpignore="true"
+                                data-1p-ignore="true"
+                                data-form-type="other"
+                                value={parseWhatsAppUrl(link.url).phone}
+                                onChange={(e) => {
+                                  const currentMsg = parseWhatsAppUrl(link.url).msg;
+                                  const newPhone = e.target.value.replace(/[^0-9]/g, '');
+                                  handleUpdateLink(link.id, { url: buildWhatsAppUrl(newPhone, currentMsg) });
+                                }}
+                                placeholder="e.g. 9413879444"
+                                className="w-full px-2.5 py-1.5 text-xs text-stone-900 font-mono font-bold focus:outline-none"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] text-stone-500 block mb-0.5 font-medium">
+                              Pre-filled Customer Message (Optional)
+                            </label>
+                            <input
+                              type="text"
+                              name={`link_wp_msg_${link.id}`}
+                              autoComplete="off"
+                              data-lpignore="true"
+                              data-1p-ignore="true"
+                              data-form-type="other"
+                              value={parseWhatsAppUrl(link.url).msg}
+                              onChange={(e) => {
+                                const currentPhone = parseWhatsAppUrl(link.url).phone;
+                                handleUpdateLink(link.id, { url: buildWhatsAppUrl(currentPhone, e.target.value) });
+                              }}
+                              placeholder="e.g. Hello, I want to book an appointment with your shop."
+                              className="w-full bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs text-stone-900 focus:outline-none focus:border-[#5C3A21]"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="sm:col-span-2">
+                          <label className="text-[10px] text-stone-500 block mb-0.5 font-medium">
+                            Destination Link URL
+                          </label>
+                          <input
+                            type="url"
+                            required
+                            name={`link_url_${link.id}`}
+                            autoComplete="off"
+                            data-lpignore="true"
+                            data-1p-ignore="true"
+                            data-form-type="other"
+                            value={link.url}
+                            onChange={(e) => handleUpdateLink(link.id, { url: e.target.value })}
+                            placeholder={isGoogleReview ? 'https://search.google.com/local/writereview?placeid=...' : 'https://...'}
+                            className="w-full bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs text-stone-900 font-mono focus:outline-none focus:border-[#5C3A21]"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 );

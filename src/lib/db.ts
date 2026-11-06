@@ -1,4 +1,4 @@
-import { Shop } from '@/types';
+import { Shop, ShopClickStats } from '@/types';
 import { db, isFirebaseConfigured } from './firebase';
 import { INITIAL_SHOPS } from './initialData';
 import {
@@ -11,7 +11,7 @@ import {
   increment,
 } from 'firebase/firestore';
 
-const LOCAL_STORAGE_KEY = 'tap_tap_nfc_shops_v2';
+const LOCAL_STORAGE_KEY = 'tap_tap_nfc_shops_v3';
 
 let memoryShops: Shop[] = [...INITIAL_SHOPS];
 
@@ -31,15 +31,13 @@ export function getLocalShops(): Shop[] {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!raw) {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(INITIAL_SHOPS));
-      return INITIAL_SHOPS;
+      return [];
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       return parsed;
     }
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(INITIAL_SHOPS));
-    return INITIAL_SHOPS;
+    return [];
   } catch (e) {
     console.warn("Could not read local shops:", e);
     return memoryShops;
@@ -64,20 +62,12 @@ export async function getShops(): Promise<Shop[]> {
     try {
       const colRef = collection(db, 'shops');
       const snap = await withTimeout(getDocs(colRef), 3000);
-      if (!snap.empty) {
-        const fetched: Shop[] = [];
-        snap.forEach((docItem) => {
-          fetched.push(docItem.data() as Shop);
-        });
-        saveLocalShops(fetched);
-        return fetched;
-      } else {
-        // Seed initial shops to Firestore
-        for (const s of INITIAL_SHOPS) {
-          await setDoc(doc(db, 'shops', s.id), s);
-        }
-        return INITIAL_SHOPS;
-      }
+      const fetched: Shop[] = [];
+      snap.forEach((docItem) => {
+        fetched.push(docItem.data() as Shop);
+      });
+      saveLocalShops(fetched);
+      return fetched;
     } catch (err) {
       console.warn("Firestore getShops using local storage cache:", (err as Error)?.message);
     }
@@ -124,6 +114,16 @@ export async function saveShop(shop: Shop): Promise<Shop> {
     createdAt: shop.createdAt || now,
     viewsCount: shop.viewsCount || 0,
     tapsCount: shop.tapsCount || 0,
+    referralClicks: shop.referralClicks || 0,
+    clickStats: shop.clickStats || {
+      google_review: 0,
+      whatsapp: 0,
+      instagram: 0,
+      facebook: 0,
+      website: 0,
+      main_button: 0,
+      referral: 0,
+    },
     showReferral: shop.showReferral !== false,
   };
 
@@ -167,38 +167,118 @@ export async function deleteShop(id: string): Promise<boolean> {
   return true;
 }
 
-export async function trackShopTap(slug: string): Promise<void> {
+/**
+ * Wipe all shops completely to give the admin a 100% clean, blank dashboard.
+ */
+export async function clearAllShops(): Promise<void> {
+  const current = getLocalShops();
+  if (isFirebaseConfigured && db) {
+    try {
+      for (const s of current) {
+        await deleteDoc(doc(db, 'shops', s.id));
+      }
+    } catch (err) {
+      console.warn("Firestore clearAllShops failed:", err);
+    }
+  }
+  saveLocalShops([]);
+}
+
+/**
+ * Comprehensive Click & Referral Tracking per Shop
+ * Tracks:
+ * - 'visit': NFC tag tapped / shop page opened
+ * - 'referral': "Our Other Services & Solutions" or developer referral clicked
+ * - 'google_review': Google 5-star review card tapped
+ * - 'whatsapp': WhatsApp / Appointment booking button tapped
+ * - 'instagram': Instagram profile card tapped
+ * - 'facebook': Facebook profile card tapped
+ * - 'website': Shop catalog/menu website tapped
+ * - 'main_button': "Visit Our Shop" (Google Maps) tapped
+ */
+export async function trackShopAction(slug: string, actionType: string): Promise<void> {
   const normalized = slug.toLowerCase().trim();
   const shops = getLocalShops();
   const shop = shops.find((s) => s.slug.toLowerCase().trim() === normalized);
 
   if (shop) {
-    shop.tapsCount = (shop.tapsCount || 0) + 1;
+    if (!shop.clickStats) {
+      shop.clickStats = {};
+    }
+
+    if (actionType === 'visit') {
+      shop.tapsCount = (shop.tapsCount || 0) + 1;
+    } else {
+      shop.clickStats[actionType] = (shop.clickStats[actionType] || 0) + 1;
+    }
+
+    if (actionType === 'referral') {
+      shop.referralClicks = (shop.referralClicks || 0) + 1;
+    }
+
     saveLocalShops(shops);
 
     if (isFirebaseConfigured && db && shop.id) {
       try {
         const docRef = doc(db, 'shops', shop.id);
-        await updateDoc(docRef, {
-          tapsCount: increment(1),
-        });
-      } catch (err) {
+        const updates: Record<string, unknown> = {};
+
+        if (actionType === 'visit') {
+          updates.tapsCount = increment(1);
+        } else {
+          updates[`clickStats.${actionType}`] = increment(1);
+        }
+
+        if (actionType === 'referral') {
+          updates.referralClicks = increment(1);
+        }
+
+        await updateDoc(docRef, updates);
+      } catch {
         // silent
       }
     }
   }
 }
 
-export async function resetToDemoShops(): Promise<Shop[]> {
-  saveLocalShops(INITIAL_SHOPS);
-  if (isFirebaseConfigured && db) {
-    try {
-      for (const s of INITIAL_SHOPS) {
-        await setDoc(doc(db, 'shops', s.id), s);
+// Backwards compatibility alias
+export async function trackShopTap(slug: string): Promise<void> {
+  return trackShopAction(slug, 'visit');
+}
+
+/**
+ * Reset click and visit stats back to 0 for a shop (useful for testing)
+ */
+export async function resetShopAnalytics(id: string): Promise<void> {
+  const shops = getLocalShops();
+  const shop = shops.find((s) => s.id === id);
+  if (shop) {
+    shop.tapsCount = 0;
+    shop.viewsCount = 0;
+    shop.referralClicks = 0;
+    shop.clickStats = {
+      google_review: 0,
+      whatsapp: 0,
+      instagram: 0,
+      facebook: 0,
+      website: 0,
+      main_button: 0,
+      referral: 0,
+    };
+    saveLocalShops(shops);
+
+    if (isFirebaseConfigured && db && shop.id) {
+      try {
+        const docRef = doc(db, 'shops', shop.id);
+        await updateDoc(docRef, {
+          tapsCount: 0,
+          viewsCount: 0,
+          referralClicks: 0,
+          clickStats: shop.clickStats,
+        });
+      } catch (err) {
+        console.warn("Firestore reset analytics failed:", err);
       }
-    } catch (err) {
-      console.warn("Firestore reset error:", err);
     }
   }
-  return INITIAL_SHOPS;
 }

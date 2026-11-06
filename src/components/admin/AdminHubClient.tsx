@@ -32,3 +32,4 @@ export default function AdminHubClient() {
 
   return <AdminDashboard onLogout={() => setIsAuthenticated(false)} />;
 }
+

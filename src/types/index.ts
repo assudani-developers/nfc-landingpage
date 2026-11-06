@@ -11,6 +11,17 @@ export interface ShopLink {
 
 export type ShopTheme = 'warm_cafe' | 'gold' | 'emerald' | 'sunset' | 'sage' | 'classic';
 
+export interface ShopClickStats {
+  google_review?: number;
+  whatsapp?: number;
+  instagram?: number;
+  facebook?: number;
+  website?: number;
+  main_button?: number;
+  referral?: number;
+  [key: string]: number | undefined;
+}
+
 export interface Shop {
   id: string;
   slug: string; // e.g. "urban-cafe"
@@ -30,6 +41,8 @@ export interface Shop {
   showReferral?: boolean; // toggle developer credit & referral
   viewsCount: number;
   tapsCount: number;
+  referralClicks?: number; // Total referral clicks for "Our Other Services" from this shop
+  clickStats?: ShopClickStats; // Detailed breakdown of where clicks happened
   createdAt: number;
   updatedAt: number;
 }
