@@ -1,6 +1,5 @@
 import { Shop } from '@/types';
 import { db, isFirebaseConfigured } from './firebase';
-import { INITIAL_SHOPS } from './initialData';
 import {
   collection,
   doc,
@@ -11,9 +10,9 @@ import {
   increment,
 } from 'firebase/firestore';
 
-const LOCAL_STORAGE_KEY = 'tap_tap_nfc_shops_v3';
+const LOCAL_STORAGE_KEY = 'tap_tap_nfc_shops_v4';
 
-let memoryShops: Shop[] = [...INITIAL_SHOPS];
+let memoryShops: Shop[] = [];
 
 function withTimeout<T>(promise: Promise<T>, ms = 3000): Promise<T> {
   return Promise.race([
