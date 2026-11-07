@@ -50,9 +50,12 @@ const COLOR_PRESETS: { name: string; color: string; theme: ShopTheme }[] = [
 
 // Helper functions for clean Indian 10-digit WhatsApp phone numbers
 function extractCleanIndianPhone(input: string): string {
-  let digits = input.replace(/\D/g, '');
-  // If user pasted, typed extra country code, or had multiplied prefixes, take last 10 digits
-  if (digits.length > 10) {
+  let digits = (input || '').replace(/\D/g, '');
+  if (digits.length === 12 && digits.startsWith('91')) {
+    digits = digits.slice(2);
+  } else if (digits.length === 11 && digits.startsWith('0')) {
+    digits = digits.slice(1);
+  } else if (digits.length > 10) {
     digits = digits.slice(-10);
   }
   return digits;
@@ -64,8 +67,12 @@ function parseWhatsAppUrl(url: string) {
     const raw = url.replace(/^(https?:\/\/)?(wa\.me\/|api\.whatsapp\.com\/send\?phone=)/i, '');
     const [numPart, query] = raw.split('?');
     let phone = numPart ? numPart.replace(/\D/g, '') : '';
-    // Strip country code 91 or take last 10 digits
-    if (phone.length > 10) {
+    // If it's a standard Indian full number with 91 prefix (12 digits)
+    if (phone.length === 12 && phone.startsWith('91')) {
+      phone = phone.slice(2);
+    } else if (phone.length === 11 && phone.startsWith('0')) {
+      phone = phone.slice(1);
+    } else if (phone.length > 10) {
       phone = phone.slice(-10);
     }
     let msg = '';
@@ -137,6 +144,15 @@ export default function ShopEditModal({
     : [DEFAULT_GOOGLE_REVIEW_LINK];
 
   const [links, setLinks] = useState<ShopLink[]>(initialLinks);
+  const [whatsappInputs, setWhatsappInputs] = useState<Record<string, { phone: string; msg: string }>>(() => {
+    const map: Record<string, { phone: string; msg: string }> = {};
+    for (const l of initialLinks) {
+      if (l.type === 'whatsapp') {
+        map[l.id] = parseWhatsAppUrl(l.url);
+      }
+    }
+    return map;
+  });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -199,6 +215,13 @@ export default function ShopEditModal({
       url,
     };
 
+    if (type === 'whatsapp') {
+      setWhatsappInputs((prev) => ({
+        ...prev,
+        [newLink.id]: { phone: '', msg: '' },
+      }));
+    }
+
     setLinks([...links, newLink]);
   };
 
@@ -214,6 +237,11 @@ export default function ShopEditModal({
     }
     setError(null);
     setLinks(links.filter((l) => l.id !== id));
+    setWhatsappInputs((prev) => {
+      const copy = { ...prev };
+      delete copy[id];
+      return copy;
+    });
   };
 
   const handleCustomLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -270,11 +298,12 @@ export default function ShopEditModal({
       let finalUrl = (link.url || '').trim();
 
       if (link.type === 'whatsapp') {
-        const parsed = parseWhatsAppUrl(finalUrl);
-        if (!parsed.phone) {
+        const wp = whatsappInputs[link.id] || parseWhatsAppUrl(finalUrl);
+        const cleanPhone = extractCleanIndianPhone(wp.phone);
+        if (!cleanPhone) {
           continue; // skip if phone wasn't filled
         }
-        finalUrl = buildWhatsAppUrl(parsed.phone, parsed.msg);
+        finalUrl = buildWhatsAppUrl(cleanPhone, wp.msg);
       } else if (link.type === 'google_review') {
         if (!finalUrl || finalUrl === 'https://...' || finalUrl === 'https://') {
           // Auto-generate Google Search Review URL
@@ -1128,11 +1157,22 @@ export default function ShopEditModal({
                                 data-lpignore="true"
                                 data-1p-ignore="true"
                                 data-form-type="other"
-                                value={parseWhatsAppUrl(link.url).phone}
+                                value={whatsappInputs[link.id]?.phone ?? parseWhatsAppUrl(link.url).phone}
                                 onChange={(e) => {
-                                  const currentMsg = parseWhatsAppUrl(link.url).msg;
-                                  const cleanTyped = extractCleanIndianPhone(e.target.value);
-                                  handleUpdateLink(link.id, { url: buildWhatsAppUrl(cleanTyped, currentMsg) });
+                                  let val = e.target.value.replace(/\D/g, '');
+                                  if (val.length === 12 && val.startsWith('91')) {
+                                    val = val.slice(2);
+                                  } else if (val.length === 11 && val.startsWith('0')) {
+                                    val = val.slice(1);
+                                  } else if (val.length > 10) {
+                                    val = val.slice(-10);
+                                  }
+                                  const currentMsg = whatsappInputs[link.id]?.msg ?? parseWhatsAppUrl(link.url).msg;
+                                  setWhatsappInputs((prev) => ({
+                                    ...prev,
+                                    [link.id]: { phone: val, msg: currentMsg },
+                                  }));
+                                  handleUpdateLink(link.id, { url: buildWhatsAppUrl(val, currentMsg) });
                                 }}
                                 placeholder="Enter 10-digit number (e.g. 9413879444)"
                                 className="w-full px-2.5 py-1.5 text-xs text-stone-900 font-mono font-bold focus:outline-none"
@@ -1151,10 +1191,15 @@ export default function ShopEditModal({
                               data-lpignore="true"
                               data-1p-ignore="true"
                               data-form-type="other"
-                              value={parseWhatsAppUrl(link.url).msg}
+                              value={whatsappInputs[link.id]?.msg ?? parseWhatsAppUrl(link.url).msg}
                               onChange={(e) => {
-                                const currentPhone = parseWhatsAppUrl(link.url).phone;
-                                handleUpdateLink(link.id, { url: buildWhatsAppUrl(currentPhone, e.target.value) });
+                                const currentPhone = whatsappInputs[link.id]?.phone ?? parseWhatsAppUrl(link.url).phone;
+                                const newMsg = e.target.value;
+                                setWhatsappInputs((prev) => ({
+                                  ...prev,
+                                  [link.id]: { phone: currentPhone, msg: newMsg },
+                                }));
+                                handleUpdateLink(link.id, { url: buildWhatsAppUrl(currentPhone, newMsg) });
                               }}
                               placeholder="e.g. Hello, I want to book an appointment with your shop."
                               className="w-full bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs text-stone-900 focus:outline-none focus:border-[#5C3A21]"
