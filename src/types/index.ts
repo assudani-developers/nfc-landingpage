@@ -29,7 +29,8 @@ export interface Shop {
   category: string; // e.g. "Café • Bakery • Beverages"
   tagline: string; // e.g. "Your neighbourhood café for great coffee, fresh bites and good vibes."
   address?: string;
-  coverUrl: string; // storefront photo
+  coverUrl?: string; // storefront photo (optional)
+  hasCover?: boolean; // toggle banner on/off
   coverFit?: 'cover' | 'contain'; // banner fit style (crop to cover or full banner)
   coverPositionY?: number; // 0 to 100% vertical alignment (default 50)
   coverPositionX?: number; // 0 to 100% horizontal alignment (default 50)

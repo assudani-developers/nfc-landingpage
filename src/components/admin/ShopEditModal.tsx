@@ -120,6 +120,10 @@ export default function ShopEditModal({
   const [buttonUrl, setButtonUrl] = useState(initialShop?.buttonUrl || '');
   const [themeColor, setThemeColor] = useState(initialShop?.themeColor || '#5C3A21');
   const [showReferral, setShowReferral] = useState(initialShop?.showReferral !== false);
+  const [hasCover, setHasCover] = useState<boolean>(() => {
+    if (initialShop?.hasCover !== undefined) return initialShop.hasCover;
+    return Boolean(initialShop?.coverUrl);
+  });
   const [coverUrl, setCoverUrl] = useState(initialShop?.coverUrl || '');
   const [coverFit, setCoverFit] = useState<'cover' | 'contain'>(initialShop?.coverFit || 'cover');
   const [coverPositionY, setCoverPositionY] = useState<number>(initialShop?.coverPositionY ?? 50);
@@ -317,11 +321,12 @@ export default function ShopEditModal({
         buttonText: buttonText.trim() || 'Visit Our Shop',
         buttonUrl: buttonUrl.trim() || `https://maps.google.com/?q=${encodeURIComponent(name)}`,
         themeColor: themeColor || '#5C3A21',
-        coverUrl: coverUrl.trim() || PRESET_COVERS[0].url,
-        coverFit,
-        coverPositionY,
-        coverPositionX,
-        coverScale,
+        hasCover,
+        coverUrl: hasCover ? (coverUrl.trim() || PRESET_COVERS[0].url) : '',
+        coverFit: hasCover ? coverFit : 'cover',
+        coverPositionY: hasCover ? coverPositionY : 50,
+        coverPositionX: hasCover ? coverPositionX : 50,
+        coverScale: hasCover ? coverScale : 100,
         logoUrl: logoUrl.trim() || PRESET_LOGOS[0].url,
         theme,
         rating: initialShop?.rating || 4.9,
@@ -583,15 +588,77 @@ export default function ShopEditModal({
             </div>
           </div>
 
-          {/* Section 3: Storefront Cover Photo (Gallery Upload + Presets) */}
-          <div className="space-y-3">
+          {/* Section 3: Storefront Cover Photo (Optional) */}
+          <div className="space-y-3 p-4 rounded-2xl bg-white border border-stone-200">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
-                <Camera className="w-4 h-4 text-[#5C3A21]" />
-                <span>Storefront Cover Photo (Wave Banner)</span>
-              </label>
-              <span className="text-[11px] text-stone-500 font-medium">Direct Gallery Upload or Presets</span>
+              <div>
+                <label className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                  <Camera className="w-4 h-4 text-[#5C3A21]" />
+                  <span>Storefront Cover Banner</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 font-semibold">
+                    Optional
+                  </span>
+                </label>
+                <p className="text-[11px] text-stone-500 mt-0.5">
+                  Optional image banner across top. Works beautifully with or without a banner!
+                </p>
+              </div>
+
+              {/* Toggle switch for hasCover */}
+              <button
+                type="button"
+                onClick={() => {
+                  const nextState = !hasCover;
+                  setHasCover(nextState);
+                  if (nextState && !coverUrl) {
+                    setCoverUrl(PRESET_COVERS[0].url);
+                  }
+                }}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${
+                  hasCover ? 'bg-[#5C3A21]' : 'bg-stone-300'
+                }`}
+                title={hasCover ? 'Banner is enabled. Click to disable.' : 'Banner is disabled. Click to enable.'}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    hasCover ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
             </div>
+
+            {!hasCover ? (
+              <div className="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#EDE8E1] flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5 text-stone-700">
+                  <span className="text-lg">✨</span>
+                  <div>
+                    <span className="font-bold text-stone-900 block">Clean Card Mode Active (No Banner)</span>
+                    <span className="text-[11px] text-stone-500">Your card will feature a clean, high-profile layout focused on logo, rating, links &amp; directions.</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHasCover(true);
+                    if (!coverUrl) setCoverUrl(PRESET_COVERS[0].url);
+                  }}
+                  className="px-3.5 py-1.5 rounded-lg bg-[#5C3A21] hover:bg-[#472c19] text-white text-[11px] font-bold transition flex-shrink-0 shadow-2xs"
+                >
+                  + Add Banner
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 pt-2 border-t border-stone-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-stone-600">Select Banner Source or Upload:</span>
+                  <button
+                    type="button"
+                    onClick={() => setHasCover(false)}
+                    className="text-[10px] text-rose-600 hover:text-rose-800 font-semibold"
+                  >
+                    Remove Banner (Clean Mode)
+                  </button>
+                </div>
 
             {/* Direct Gallery Upload Trigger Card */}
             <div className="p-3.5 rounded-2xl border-2 border-dashed border-[#5C3A21]/30 hover:border-[#5C3A21] bg-[#FAF7F2] hover:bg-[#F3ECE4] transition group flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -853,6 +920,8 @@ export default function ShopEditModal({
               </div>
             </div>
           </div>
+        )}
+      </div>
 
           {/* Section 4: Shop Logo (Gallery Upload + Presets) */}
           <div className="space-y-3 pt-2">

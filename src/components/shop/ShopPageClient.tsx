@@ -11,6 +11,8 @@ import {
   MapPin,
   ChevronRight,
   Star,
+  ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { trackShopAction, getLocalShops } from '@/lib/db';
@@ -78,7 +80,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
   const firstRowLinks = shop.links.slice(0, 3);
   const secondRowLinks = shop.links.slice(3, 5);
 
-  const defaultCoverUrl = shop.coverUrl || 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=900&auto=format&fit=crop&q=80';
+  const hasCover = shop.hasCover !== false && Boolean(shop.coverUrl);
   const buttonLink = shop.buttonUrl || (shop.address ? `https://maps.google.com/?q=${encodeURIComponent(shop.name + ' ' + shop.address)}` : 'https://maps.google.com');
   const mainButtonBg = shop.themeColor || '#5C3A21';
 
@@ -95,91 +97,147 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
 
   return (
     <div
-      className="min-h-screen w-full bg-[#FAF7F2] sm:bg-[#F2ECE5] text-stone-900 flex flex-col items-center justify-start sm:justify-center relative overflow-x-hidden selection:bg-amber-200 selection:text-amber-950 font-sans p-0 sm:py-8 sm:px-4"
+      className="min-h-screen w-full bg-[#FAF7F2] sm:bg-[#F0EAE1] text-stone-900 flex flex-col items-center justify-start sm:justify-center relative overflow-x-hidden selection:bg-amber-200 selection:text-amber-950 font-sans p-0 sm:py-10 sm:px-4"
       suppressHydrationWarning
     >
-      {/* Desktop Ambient Glow */}
+      {/* Desktop Ambient Luxury Atmosphere */}
       <div className="hidden sm:block absolute inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[720px] h-[720px] rounded-full bg-gradient-to-tr from-amber-100/50 via-stone-200/40 to-transparent blur-3xl opacity-70" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[750px] h-[750px] rounded-full bg-gradient-to-tr from-amber-100/60 via-stone-200/50 to-transparent blur-3xl opacity-80" />
+      </div>
+
+      {/* Desktop Top Floating Pill */}
+      <div className="hidden sm:inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 border border-[#EDE8E1] text-[11px] font-bold text-stone-700 mb-4 shadow-xs backdrop-blur-xs">
+        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span>TapTap NFC Contactless Profile</span>
       </div>
 
       {/* Main Centered Responsive Card Shell */}
-      <div className="w-full max-w-[440px] sm:max-w-[480px] md:max-w-[500px] min-h-screen sm:min-h-[740px] bg-[#FAF7F2] relative z-10 flex flex-col items-center sm:my-6 sm:rounded-[40px] sm:shadow-2xl sm:shadow-stone-900/10 sm:border sm:border-[#EDE8E1] overflow-hidden">
+      <div className="w-full max-w-[440px] sm:max-w-[480px] md:max-w-[500px] min-h-screen sm:min-h-[740px] bg-[#FAF7F2] relative z-10 flex flex-col items-center sm:rounded-[44px] sm:shadow-2xl sm:shadow-stone-900/12 sm:border sm:border-[#EDE8E1] overflow-hidden">
+        
         {/* ============================================================== */}
-        {/* 1. STOREFRONT COVER PHOTO WITH CURVED WAVE MASK                */}
+        {/* 1. HEADER SECTION: COVER BANNER OR CLEAN MINIMALIST AVATAR     */}
         {/* ============================================================== */}
-        <div className="relative w-full h-52 sm:h-60 md:h-64 overflow-hidden bg-stone-900/5 flex-shrink-0">
-          {/* Ambient Blurred Backdrop so letterboxing / widescreen banners look complete */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={defaultCoverUrl}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-110 pointer-events-none"
-          />
-
-          {/* Main Cover Banner */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={defaultCoverUrl}
-            alt={shop.name}
-            style={{
-              objectPosition: `${shop.coverPositionX ?? 50}% ${shop.coverPositionY ?? 50}%`,
-              transform: (shop.coverScale && shop.coverScale !== 100) ? `scale(${shop.coverScale / 100})` : undefined,
-            }}
-            className={`relative w-full h-full object-center transition-all duration-300 ${
-              shop.coverFit === 'contain'
-                ? 'object-contain py-2'
-                : 'object-cover'
-            }`}
-          />
-
-          {/* Subtle warm gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/35 pointer-events-none" />
-
-          {/* Organic Curved Wave Mask at Bottom (Upward Dome Crest) */}
-          <CurvedWaveMask />
-        </div>
-
-        {/* ============================================================== */}
-        {/* 2. FLOATING LOGO (Centered Overlapping Curve)                  */}
-        {/* ============================================================== */}
-        <div className="relative -mt-14 z-20 flex flex-col items-center">
-          <div className="w-24 h-24 rounded-[26px] bg-white border border-[#EDE8E1] p-1.5 shadow-xl shadow-stone-300/60 flex items-center justify-center overflow-hidden">
-            {shop.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
+        {hasCover ? (
+          <>
+            {/* Storefront Cover Banner with Wave Mask */}
+            <div className="relative w-full h-52 sm:h-60 md:h-64 overflow-hidden bg-stone-900/5 flex-shrink-0">
+              {/* Ambient Blurred Backdrop */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={shop.logoUrl}
-                alt={shop.name}
-                className="w-full h-full object-cover rounded-[20px]"
+                src={shop.coverUrl}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-110 pointer-events-none"
               />
-            ) : (
-              <div className="w-full h-full bg-[#FAF7F2] rounded-[20px] flex items-center justify-center">
-                <CoffeeCupIcon className="w-10 h-10 text-[#5C3A21]" />
+
+              {/* Main Cover Banner */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={shop.coverUrl}
+                alt={shop.name}
+                style={{
+                  objectPosition: `${shop.coverPositionX ?? 50}% ${shop.coverPositionY ?? 50}%`,
+                  transform: (shop.coverScale && shop.coverScale !== 100) ? `scale(${shop.coverScale / 100})` : undefined,
+                }}
+                className={`relative w-full h-full object-center transition-all duration-300 ${
+                  shop.coverFit === 'contain'
+                    ? 'object-contain py-2'
+                    : 'object-cover'
+                }`}
+              />
+
+              {/* Subtle warm gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/35 pointer-events-none" />
+
+              {/* Organic Curved Wave Mask at Bottom (Upward Dome Crest) */}
+              <CurvedWaveMask />
+            </div>
+
+            {/* Floating Logo (Centered Overlapping Curve) */}
+            <div className="relative -mt-14 z-20 flex flex-col items-center">
+              <div className="w-24 h-24 rounded-[26px] bg-white border border-[#EDE8E1] p-1.5 shadow-xl shadow-stone-300/60 flex items-center justify-center overflow-hidden">
+                {shop.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={shop.logoUrl}
+                    alt={shop.name}
+                    className="w-full h-full object-cover rounded-[20px]"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#FAF7F2] rounded-[20px] flex items-center justify-center">
+                    <CoffeeCupIcon className="w-10 h-10 text-[#5C3A21]" />
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+          </>
+        ) : (
+          /* Clean Minimalist Header (Without Banner) */
+          <div className="w-full relative pt-8 pb-2 px-6 flex flex-col items-center overflow-hidden">
+            {/* Ambient subtle radial glow in shop's theme color */}
+            <div
+              className="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-36 rounded-full blur-3xl opacity-25 pointer-events-none"
+              style={{ backgroundColor: shop.themeColor || '#5C3A21' }}
+            />
+
+            {/* Smart Contactless Profile Tag */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 border border-[#EDE8E1] text-[10px] font-extrabold uppercase tracking-wider text-stone-600 shadow-2xs mb-5 backdrop-blur-xs">
+              <Sparkles className="w-3 h-3 text-amber-600" />
+              <span>Smart NFC Business Card</span>
+            </div>
+
+            {/* Centered Large Featured Logo / Monogram */}
+            <div className="relative group">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-[28px] bg-white border-2 border-[#EDE8E1] p-1.5 shadow-xl shadow-stone-300/40 flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-105">
+                {shop.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={shop.logoUrl}
+                    alt={shop.name}
+                    className="w-full h-full object-cover rounded-[22px]"
+                  />
+                ) : (
+                  <div
+                    className="w-full h-full rounded-[22px] flex items-center justify-center font-black text-2xl text-white shadow-inner"
+                    style={{ backgroundColor: shop.themeColor || '#5C3A21' }}
+                  >
+                    {shop.name.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div className="absolute -bottom-1 -right-1 p-1 bg-white rounded-full shadow-md border border-stone-100">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 fill-emerald-100" />
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ============================================================== */}
-        {/* 3. SHOP NAME, CATEGORIES, RATING & DESCRIPTION                 */}
+        {/* 2. SHOP NAME, CATEGORIES, RATING & DESCRIPTION                 */}
         {/* ============================================================== */}
-        <div className="px-6 text-center mt-3.5 z-10">
+        <div className={`px-6 text-center z-10 ${hasCover ? 'mt-3.5' : 'mt-4'}`}>
           <h1 className="text-2xl sm:text-[28px] font-black text-stone-900 tracking-tight leading-tight">
             {shop.name}
           </h1>
 
-          <div className="mt-1.5 flex items-center justify-center gap-2 flex-wrap">
+          <div className="mt-2 flex items-center justify-center gap-2 flex-wrap">
             {shop.category && (
               <span className="text-xs sm:text-sm font-semibold text-[#8C6239] tracking-wide">
                 {shop.category}
               </span>
             )}
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-[11px] font-bold">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200/90 text-amber-950 text-[11px] font-bold shadow-2xs">
               <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
               <span>{shop.rating || 4.9}</span>
               <span className="text-stone-400 font-normal">({shop.reviewCount || 150}+)</span>
             </span>
           </div>
+
+          {shop.address && (
+            <div className="mt-1.5 flex items-center justify-center gap-1 text-[11px] text-stone-500 font-medium">
+              <MapPin className="w-3 h-3 text-[#5C3A21] flex-shrink-0" />
+              <span className="truncate max-w-xs">{shop.address}</span>
+            </div>
+          )}
 
           {shop.tagline && (
             <p className="mt-2 text-xs sm:text-sm text-stone-600 max-w-sm mx-auto leading-relaxed">
