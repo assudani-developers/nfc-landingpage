@@ -15,7 +15,6 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { WhatsAppIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';
-import { BotanicalBranch } from '@/components/decorations/LightDecorations';
 
 export const metadata = {
   title: 'Our Other Services & Digital Solutions | Piyush Assudani - Software & Web Developer',
@@ -29,9 +28,6 @@ export default function ServicesPage() {
       className="min-h-screen w-full bg-[#FAF7F2] text-stone-900 flex flex-col items-center justify-start p-4 sm:p-8 relative selection:bg-amber-200 selection:text-amber-950 font-sans"
       suppressHydrationWarning
     >
-      {/* Decorative Botanical Leaf Accents */}
-      <BotanicalBranch position="bottom-left" className="w-48 h-64 opacity-25 hidden sm:block" />
-
       {/* Top Navbar */}
       <header className="w-full max-w-4xl flex items-center justify-between mb-6 z-10 px-1 sm:px-2">
         <Link

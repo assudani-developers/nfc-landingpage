@@ -6,7 +6,6 @@ import { LocalBrandIcon } from '@/components/icons/BrandIcons';
 import {
   CurvedWaveMask,
   CoffeeCupIcon,
-  BotanicalBranch,
 } from '@/components/decorations/LightDecorations';
 import {
   MapPin,
@@ -105,17 +104,11 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
       </div>
 
       {/* Main Centered Responsive Card Shell */}
-      <div className="w-full max-w-[440px] sm:max-w-[480px] md:max-w-[500px] bg-[#FAF7F2] relative z-10 flex flex-col items-center sm:my-4 sm:rounded-[40px] sm:shadow-2xl sm:shadow-stone-900/10 sm:border sm:border-[#EDE8E1] overflow-hidden pb-8 sm:pb-9">
-        {/* Subtle Botanical Leaf on Card Bottom Left */}
-        <BotanicalBranch position="bottom-left" className="w-32 h-44 sm:w-40 sm:h-52 opacity-25" />
-
+      <div className="w-full max-w-[440px] sm:max-w-[480px] md:max-w-[500px] min-h-screen sm:min-h-[740px] bg-[#FAF7F2] relative z-10 flex flex-col items-center sm:my-6 sm:rounded-[40px] sm:shadow-2xl sm:shadow-stone-900/10 sm:border sm:border-[#EDE8E1] overflow-hidden">
         {/* ============================================================== */}
         {/* 1. STOREFRONT COVER PHOTO WITH CURVED WAVE MASK                */}
         {/* ============================================================== */}
-        <div className="relative w-full h-52 sm:h-60 md:h-64 overflow-hidden bg-stone-900/5">
-          {/* Subtle Botanical Leaf at Top Left */}
-          <BotanicalBranch position="top-left" className="w-24 h-32 opacity-35" />
-
+        <div className="relative w-full h-52 sm:h-60 md:h-64 overflow-hidden bg-stone-900/5 flex-shrink-0">
           {/* Ambient Blurred Backdrop so letterboxing / widescreen banners look complete */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -129,6 +122,10 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
           <img
             src={defaultCoverUrl}
             alt={shop.name}
+            style={{
+              objectPosition: `${shop.coverPositionX ?? 50}% ${shop.coverPositionY ?? 50}%`,
+              transform: (shop.coverScale && shop.coverScale !== 100) ? `scale(${shop.coverScale / 100})` : undefined,
+            }}
             className={`relative w-full h-full object-center transition-all duration-300 ${
               shop.coverFit === 'contain'
                 ? 'object-contain py-2'
@@ -331,7 +328,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
         {/* 6. REFERRAL: ATTACHED "OUR OTHER SERVICES" & DEVELOPER CREDITS   */}
         {/* ============================================================== */}
         {shop.showReferral !== false && (
-          <div className="w-full px-5 sm:px-6 mt-6 z-10 flex flex-col items-center">
+          <div className="w-full px-5 sm:px-6 mt-auto pt-8 pb-7 z-10 flex flex-col items-center">
             <div className="w-full rounded-2xl bg-white border border-[#EDE8E1] shadow-xs overflow-hidden transition group hover:border-stone-300">
               {/* Top: Our Other Services Clickable Link */}
               <Link

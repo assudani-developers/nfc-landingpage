@@ -31,6 +31,9 @@ export interface Shop {
   address?: string;
   coverUrl: string; // storefront photo
   coverFit?: 'cover' | 'contain'; // banner fit style (crop to cover or full banner)
+  coverPositionY?: number; // 0 to 100% vertical alignment (default 50)
+  coverPositionX?: number; // 0 to 100% horizontal alignment (default 50)
+  coverScale?: number; // 100 to 200% scale/zoom (default 100)
   logoUrl: string; // shop logo
   buttonText: string; // e.g. "Visit Our Shop"
   buttonUrl: string; // Google Maps or website or phone URL

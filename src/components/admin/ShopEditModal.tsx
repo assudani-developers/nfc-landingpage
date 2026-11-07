@@ -122,6 +122,9 @@ export default function ShopEditModal({
   const [showReferral, setShowReferral] = useState(initialShop?.showReferral !== false);
   const [coverUrl, setCoverUrl] = useState(initialShop?.coverUrl || '');
   const [coverFit, setCoverFit] = useState<'cover' | 'contain'>(initialShop?.coverFit || 'cover');
+  const [coverPositionY, setCoverPositionY] = useState<number>(initialShop?.coverPositionY ?? 50);
+  const [coverPositionX, setCoverPositionX] = useState<number>(initialShop?.coverPositionX ?? 50);
+  const [coverScale, setCoverScale] = useState<number>(initialShop?.coverScale ?? 100);
   const [logoUrl, setLogoUrl] = useState(initialShop?.logoUrl || '');
   const [theme, setTheme] = useState<ShopTheme>(initialShop?.theme || 'warm_cafe');
 
@@ -316,6 +319,9 @@ export default function ShopEditModal({
         themeColor: themeColor || '#5C3A21',
         coverUrl: coverUrl.trim() || PRESET_COVERS[0].url,
         coverFit,
+        coverPositionY,
+        coverPositionX,
+        coverScale,
         logoUrl: logoUrl.trim() || PRESET_LOGOS[0].url,
         theme,
         rating: initialShop?.rating || 4.9,
@@ -653,36 +659,197 @@ export default function ShopEditModal({
               </div>
             </div>
 
-            {/* Banner Fit Style Selector */}
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-stone-100/70 border border-stone-200 text-xs">
-              <div>
-                <span className="font-bold text-stone-900 block">Banner Display Style</span>
-                <span className="text-[10px] text-stone-500">Choose how the banner image fits on screen</span>
+            {/* Interactive Banner Live Preview & Adjustment Panel */}
+            <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#E5DACD] space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                  <span>🎨 Banner Live Framing &amp; Position Adjustment</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCoverPositionY(50);
+                    setCoverPositionX(50);
+                    setCoverScale(100);
+                    setCoverFit('cover');
+                  }}
+                  className="text-[10px] text-stone-500 hover:text-stone-900 underline font-medium"
+                >
+                  Reset Framing
+                </button>
               </div>
-              <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-stone-200">
-                <button
-                  type="button"
-                  onClick={() => setCoverFit('cover')}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition ${
-                    coverFit === 'cover'
-                      ? 'bg-[#5C3A21] text-white shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900'
+
+              {/* Live Wave Preview Box */}
+              <div className="relative w-full h-36 sm:h-44 rounded-2xl overflow-hidden bg-stone-900/10 border border-stone-200 shadow-inner">
+                {/* Ambient backdrop */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={coverUrl || PRESET_COVERS[0].url}
+                  alt="Backdrop"
+                  className="absolute inset-0 w-full h-full object-cover blur-md opacity-35 scale-110 pointer-events-none"
+                />
+
+                {/* Live Adjusted Cover */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={coverUrl || PRESET_COVERS[0].url}
+                  alt="Banner preview"
+                  style={{
+                    objectPosition: `${coverPositionX}% ${coverPositionY}%`,
+                    transform: coverScale !== 100 ? `scale(${coverScale / 100})` : undefined,
+                  }}
+                  className={`relative w-full h-full transition-all duration-150 ${
+                    coverFit === 'contain' ? 'object-contain py-2' : 'object-cover'
                   }`}
-                >
-                  🖼️ Fill (Cover)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCoverFit('contain')}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition ${
-                    coverFit === 'contain'
-                      ? 'bg-[#5C3A21] text-white shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900'
-                  }`}
-                  title="Shows entire banner without cutting any text"
-                >
-                  📏 Fit (Full Banner)
-                </button>
+                />
+
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/35 pointer-events-none" />
+
+                {/* Curved wave mask preview at bottom */}
+                <div className="absolute -bottom-0.5 left-0 right-0 w-full pointer-events-none z-10 leading-none">
+                  <svg viewBox="0 0 500 45" preserveAspectRatio="none" className="block w-full h-7">
+                    <path d="M0,45 C140,4 360,4 500,45 L500,45 L0,45 Z" fill="#FAF7F2" />
+                  </svg>
+                </div>
+
+                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px] font-bold backdrop-blur-xs z-20">
+                  Live Preview with Wave Mask
+                </span>
+              </div>
+
+              {/* Banner Display Style Toggle */}
+              <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-stone-200 text-xs">
+                <span className="font-bold text-stone-800 text-[11px]">Display Mode:</span>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setCoverFit('cover')}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition ${
+                      coverFit === 'cover'
+                        ? 'bg-[#5C3A21] text-white shadow-xs'
+                        : 'text-stone-600 hover:text-stone-900'
+                    }`}
+                  >
+                    🖼️ Fill (Cover)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCoverFit('contain')}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition ${
+                      coverFit === 'contain'
+                        ? 'bg-[#5C3A21] text-white shadow-xs'
+                        : 'text-stone-600 hover:text-stone-900'
+                    }`}
+                    title="Shows entire banner without cutting any text"
+                  >
+                    📏 Fit (Full Banner)
+                  </button>
+                </div>
+              </div>
+
+              {/* Vertical Position Slider (Y-Axis) */}
+              <div className="p-2.5 rounded-xl bg-white border border-stone-200 space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-semibold text-stone-700">
+                  <span>↕️ Vertical Position (Move Up / Down):</span>
+                  <span className="font-mono text-stone-900 font-bold">{coverPositionY}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={coverPositionY}
+                  onChange={(e) => setCoverPositionY(Number(e.target.value))}
+                  className="w-full accent-[#5C3A21] cursor-pointer"
+                />
+                <div className="flex items-center justify-between pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setCoverPositionY(0)}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 text-stone-700"
+                  >
+                    ⬆️ Top (0%)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCoverPositionY(50)}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 text-stone-700"
+                  >
+                    🎯 Center (50%)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCoverPositionY(100)}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 text-stone-700"
+                  >
+                    ⬇️ Bottom (100%)
+                  </button>
+                </div>
+              </div>
+
+              {/* Horizontal Position Slider (X-Axis) */}
+              <div className="p-2.5 rounded-xl bg-white border border-stone-200 space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-semibold text-stone-700">
+                  <span>↔️ Horizontal Position (Move Left / Right):</span>
+                  <span className="font-mono text-stone-900 font-bold">{coverPositionX}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={coverPositionX}
+                  onChange={(e) => setCoverPositionX(Number(e.target.value))}
+                  className="w-full accent-[#5C3A21] cursor-pointer"
+                />
+                <div className="flex items-center justify-between pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setCoverPositionX(0)}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 text-stone-700"
+                  >
+                    ⬅️ Left (0%)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCoverPositionX(50)}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 text-stone-700"
+                  >
+                    🎯 Center (50%)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCoverPositionX(100)}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 text-stone-700"
+                  >
+                    ➡️ Right (100%)
+                  </button>
+                </div>
+              </div>
+
+              {/* Zoom / Scale Slider */}
+              <div className="p-2.5 rounded-xl bg-white border border-stone-200 space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-semibold text-stone-700">
+                  <span>🔍 Zoom / Scale:</span>
+                  <span className="font-mono text-stone-900 font-bold">{coverScale}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={100}
+                  max={180}
+                  value={coverScale}
+                  onChange={(e) => setCoverScale(Number(e.target.value))}
+                  className="w-full accent-[#5C3A21] cursor-pointer"
+                />
+                <div className="flex items-center justify-between pt-0.5">
+                  <span className="text-[10px] text-stone-400">100% (Fit)</span>
+                  <button
+                    type="button"
+                    onClick={() => setCoverScale(100)}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 text-stone-700"
+                  >
+                    Reset Zoom (100%)
+                  </button>
+                  <span className="text-[10px] text-stone-400">180% (Zoomed)</span>
+                </div>
               </div>
             </div>
           </div>
