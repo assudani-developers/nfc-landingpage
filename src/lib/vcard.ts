@@ -67,3 +67,4 @@ export function downloadShopVCard(shop: Shop) {
   document.body.removeChild(link);
   URL.revokeObjectURL(downloadUrl);
 }
+

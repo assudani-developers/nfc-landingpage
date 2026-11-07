@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Shop, ShopLink } from '@/types';
-import { LocalBrandIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';
+import { LocalBrandIcon, NfcWaveIcon, GoogleReviewIcon } from '@/components/icons/BrandIcons';
 import {
   CurvedWaveMask,
   CoffeeCupIcon,
@@ -15,6 +15,10 @@ import {
   UserPlus,
   Share2,
   Check,
+  ArrowUpRight,
+  Sparkles,
+  Navigation,
+  Copy,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { trackShopAction, getLocalShops } from '@/lib/db';
@@ -24,6 +28,46 @@ import GoogleReviewPromptModal from '@/components/shop/GoogleReviewPromptModal';
 import ShareProfileModal from '@/components/shop/ShareProfileModal';
 import { downloadShopVCard } from '@/lib/vcard';
 import Link from 'next/link';
+
+function getLinkTheme(type: string) {
+  switch (type) {
+    case 'whatsapp':
+      return {
+        badgeBg: 'bg-emerald-100/80 text-emerald-800',
+        hoverBorder: 'hover:border-emerald-300',
+        hoverBg: 'hover:bg-emerald-50/40',
+        defaultSubtitle: 'Chat & Inquiries',
+      };
+    case 'instagram':
+      return {
+        badgeBg: 'bg-pink-100/80 text-pink-800',
+        hoverBorder: 'hover:border-pink-300',
+        hoverBg: 'hover:bg-pink-50/40',
+        defaultSubtitle: 'Follow & Reels',
+      };
+    case 'facebook':
+      return {
+        badgeBg: 'bg-blue-100/80 text-blue-800',
+        hoverBorder: 'hover:border-blue-300',
+        hoverBg: 'hover:bg-blue-50/40',
+        defaultSubtitle: 'Official Page',
+      };
+    case 'website':
+      return {
+        badgeBg: 'bg-sky-100/80 text-sky-800',
+        hoverBorder: 'hover:border-sky-300',
+        hoverBg: 'hover:bg-sky-50/40',
+        defaultSubtitle: 'Visit Website',
+      };
+    default:
+      return {
+        badgeBg: 'bg-stone-100 text-stone-800',
+        hoverBorder: 'hover:border-stone-300',
+        hoverBg: 'hover:bg-stone-50/50',
+        defaultSubtitle: 'Open Link',
+      };
+  }
+}
 
 interface ShopPageClientProps {
   initialShop: Shop;
@@ -36,6 +80,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState<boolean>(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
   const [isContactSaved, setIsContactSaved] = useState<boolean>(false);
+  const [isAddressCopied, setIsAddressCopied] = useState<boolean>(false);
 
   // Download native vCard (.vcf)
   const handleSaveContact = () => {
@@ -51,6 +96,22 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
       });
     } catch {}
     setTimeout(() => setIsContactSaved(false), 2500);
+  };
+
+  // Copy shop address to clipboard with feedback
+  const handleCopyAddress = () => {
+    if (!shop.address) return;
+    navigator.clipboard.writeText(shop.address);
+    setIsAddressCopied(true);
+    try {
+      confetti({
+        particleCount: 30,
+        spread: 40,
+        origin: { y: 0.7 },
+        colors: ['#5C3A21', '#D4AF37'],
+      });
+    } catch {}
+    setTimeout(() => setIsAddressCopied(false), 2000);
   };
 
   // Smooth splash timing so the branded logo loader appears before opening
@@ -181,6 +242,12 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
               {/* Subtle warm gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/35 pointer-events-none" />
 
+              {/* Top-Left Ambient Pill */}
+              <div className="absolute top-3.5 left-3.5 z-20 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold flex items-center gap-1.5 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Smart NFC Profile</span>
+              </div>
+
               {/* Top-Right Floating Share Button on Banner */}
               <button
                 type="button"
@@ -198,19 +265,24 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
 
             {/* Floating Logo (Centered Overlapping Curve) */}
             <div className="relative -mt-12 sm:-mt-14 md:-mt-16 z-20 flex flex-col items-center">
-              <div className="w-22 h-22 sm:w-26 sm:h-26 md:w-28 md:h-28 rounded-[24px] sm:rounded-[28px] bg-white border-2 border-[#EDE8E1] p-1.5 shadow-xl shadow-stone-300/60 flex items-center justify-center overflow-hidden">
-                {shop.logoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={shop.logoUrl}
-                    alt={shop.name}
-                    className="w-full h-full object-cover rounded-[18px] sm:rounded-[22px]"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-[#FAF7F2] rounded-[18px] sm:rounded-[22px] flex items-center justify-center">
-                    <CoffeeCupIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#5C3A21]" />
-                  </div>
-                )}
+              <div className="relative group">
+                <div className="w-22 h-22 sm:w-26 sm:h-26 md:w-28 md:h-28 rounded-[24px] sm:rounded-[28px] bg-white border-2 border-white ring-4 ring-[#FAF7F2] p-1.5 shadow-xl shadow-stone-900/15 flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-105">
+                  {shop.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={shop.logoUrl}
+                      alt={shop.name}
+                      className="w-full h-full object-cover rounded-[18px] sm:rounded-[22px]"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#FAF7F2] rounded-[18px] sm:rounded-[22px] flex items-center justify-center">
+                      <CoffeeCupIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#5C3A21]" />
+                    </div>
+                  )}
+                </div>
+                <div className="absolute -bottom-1 -right-1 p-1 bg-white rounded-full shadow-md border border-stone-100">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 fill-emerald-100" />
+                </div>
               </div>
             </div>
           </>
@@ -337,68 +409,69 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
         {/* 3. SOCIAL & REVIEW BUTTONS (PRIMARY GOOGLE REVIEW + CHANNELS)   */}
         {/* ============================================================== */}
         <div className="w-full px-4 sm:px-8 md:px-10 mt-5 sm:mt-6 z-10 flex flex-col items-center">
-          {/* PRIMARY GOOGLE REVIEW HERO CARD */}
+          {/* PRIMARY GOOGLE REVIEW HERO CARD (GOLDEN SHIMMER LUXURY) */}
           {googleReviewLink && (
             <div className="max-w-xl mx-auto w-full">
-              <a
-                href={googleReviewLink.url}
-                onClick={(e) => handleLinkClick(e, googleReviewLink)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group w-full bg-white hover:bg-[#FDFCFB] border-2 border-amber-300/90 hover:border-amber-400 rounded-3xl p-3.5 sm:p-4 md:p-5 flex items-center justify-between shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
-              >
-                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-xs">
-                    <LocalBrandIcon
-                      type={googleReviewLink.type}
-                      className="w-7 h-7 sm:w-9 sm:h-9"
-                    />
-                  </div>
-                  <div className="text-left min-w-0">
-                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                      <span className="font-extrabold text-xs sm:text-base md:text-lg text-stone-900 group-hover:text-[#5C3A21] transition-colors truncate max-w-[140px] sm:max-w-xs">
-                        {googleReviewLink.title}
-                      </span>
-                      <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-950 text-[10px] sm:text-xs font-black border border-amber-300/80 inline-flex items-center gap-1 shadow-2xs">
-                        <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                        <span>5.0 Rating</span>
-                      </span>
-                    </div>
-                    <p className="text-[11px] sm:text-sm text-stone-500 mt-0.5 font-medium truncate max-w-[160px] sm:max-w-xs">
-                      {googleReviewLink.subtitle || 'Tap to leave a 5-star review'}
-                    </p>
-                  </div>
-                </div>
+              <div className="relative group/review p-[1.5px] rounded-3xl bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 shadow-sm hover:shadow-xl hover:shadow-amber-500/15 transition-all duration-300">
+                <a
+                  href={googleReviewLink.url}
+                  onClick={(e) => handleLinkClick(e, googleReviewLink)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-white hover:bg-gradient-to-b hover:from-white hover:to-amber-50/40 rounded-[22px] p-3.5 sm:p-4 md:p-5 flex items-center justify-between transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
+                >
+                  {/* Subtle Shimmer Sheen Sweep on Hover */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/25 to-transparent -translate-x-full group-hover/review:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
 
-                <div className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-[#5C3A21] group-hover:bg-[#472c19] text-white text-xs sm:text-sm font-bold shadow-xs transition flex-shrink-0 ml-2">
-                  <span>Rate Us</span>
-                  <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </a>
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-15 md:h-15 rounded-2xl bg-amber-50/80 border border-amber-200/70 flex items-center justify-center flex-shrink-0 group-hover/review:scale-105 transition-transform shadow-2xs">
+                      <GoogleReviewIcon className="w-7 h-7 sm:w-8 sm:h-8" />
+                    </div>
+                    <div className="text-left min-w-0">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        <span className="font-extrabold text-xs sm:text-base md:text-lg text-stone-900 group-hover/review:text-[#5C3A21] transition-colors truncate max-w-[140px] sm:max-w-xs">
+                          {googleReviewLink.title || 'Google Reviews'}
+                        </span>
+                        <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-amber-100/80 text-amber-950 text-[10px] sm:text-xs font-black border border-amber-300/80 inline-flex items-center gap-1 shadow-2xs">
+                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                          <span>5.0</span>
+                        </span>
+                      </div>
+                      <p className="text-[11px] sm:text-xs text-amber-800/90 font-semibold mt-0.5 flex items-center gap-1 truncate max-w-[180px] sm:max-w-xs">
+                        <Sparkles className="w-3 h-3 text-amber-500 flex-shrink-0" />
+                        <span>10 ready-made 5★ templates</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#5C3A21] to-[#7B4F2C] text-white text-xs sm:text-sm font-bold shadow-md shadow-stone-900/10 group-hover/review:brightness-110 transition-all flex-shrink-0 ml-2">
+                    <span>Rate 5★</span>
+                    <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover/review:translate-x-0.5 transition-transform" />
+                  </div>
+                </a>
+              </div>
             </div>
           )}
 
-          {/* ADDITIONAL SOCIAL / CONTACT LINKS (IF CONFIGURED) */}
+          {/* ADDITIONAL SOCIAL / CONTACT LINKS (BENTO TILES) */}
           {otherLinks.length > 0 && (
-            <div className="max-w-xl mx-auto w-full mt-2.5 sm:mt-3">
+            <div className="max-w-xl mx-auto w-full mt-3">
               <div
-                className={`grid gap-2 sm:gap-2.5 ${
+                className={`grid gap-2.5 ${
                   otherLinks.length === 1
                     ? 'grid-cols-1'
                     : otherLinks.length === 2
                     ? 'grid-cols-2'
-                    : otherLinks.length === 3
-                    ? 'grid-cols-2 sm:grid-cols-3'
-                    : otherLinks.length === 4
-                    ? 'grid-cols-2 sm:grid-cols-4'
-                    : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
+                    : 'grid-cols-2'
                 }`}
               >
                 {otherLinks.map((link: ShopLink, index: number) => {
-                  const isLastOdd =
+                  const theme = getLinkTheme(link.type);
+                  const isSingleOrLastWide =
                     otherLinks.length % 2 === 1 &&
                     index === otherLinks.length - 1 &&
                     otherLinks.length !== 1;
+
                   return (
                     <a
                       key={link.id}
@@ -406,17 +479,30 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
                       onClick={(e) => handleLinkClick(e, link)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`group bg-white hover:bg-[#FDFCFB] border border-[#EDE8E1] hover:border-stone-300 rounded-2xl py-2.5 px-3 sm:py-3 sm:px-4 flex items-center justify-center gap-2 shadow-2xs hover:shadow-xs transition-all duration-200 active:scale-95 min-w-0 ${
-                        isLastOdd ? 'col-span-2 sm:col-span-1' : ''
+                      className={`group bg-white hover:bg-stone-50/70 border border-[#EDE8E1] ${theme.hoverBorder} ${theme.hoverBg} rounded-3xl p-3.5 sm:p-4 flex flex-col justify-between shadow-2xs hover:shadow-md transition-all duration-200 active:scale-[0.98] min-w-0 ${
+                        isSingleOrLastWide ? 'col-span-2 sm:col-span-1' : ''
                       }`}
                     >
-                      <LocalBrandIcon
-                        type={link.type}
-                        className="w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0 group-hover:scale-110 transition-transform"
-                      />
-                      <span className="text-xs sm:text-sm font-bold text-stone-800 truncate">
-                        {link.title}
-                      </span>
+                      <div className="flex items-center justify-between w-full">
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                          <LocalBrandIcon
+                            type={link.type}
+                            className="w-5 h-5 sm:w-6 sm:h-6"
+                          />
+                        </div>
+                        <div className="w-7 h-7 rounded-full bg-stone-100 group-hover:bg-stone-200/80 flex items-center justify-center text-stone-500 group-hover:text-stone-800 transition-colors">
+                          <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        </div>
+                      </div>
+
+                      <div className="mt-3 text-left min-w-0">
+                        <h3 className="text-xs sm:text-sm font-bold text-stone-900 group-hover:text-[#5C3A21] transition-colors truncate">
+                          {link.title}
+                        </h3>
+                        <p className="text-[10px] sm:text-xs text-stone-500 font-medium truncate mt-0.5">
+                          {link.subtitle || theme.defaultSubtitle}
+                        </p>
+                      </div>
                     </a>
                   );
                 })}
@@ -426,23 +512,67 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
         </div>
 
         {/* ============================================================== */}
-        {/* 4. VISIT OUR SHOP PILL BUTTON (OPTIONAL / CUSTOM FROM DB)       */}
+        {/* 4. INTERACTIVE DIRECTIONS & LOCATION CARD (#5)                  */}
         {/* ============================================================== */}
         {showMainButton && (
           <div className="w-full px-4 sm:px-8 md:px-10 mt-4 sm:mt-5 z-10 flex justify-center">
-            <a
-              href={buttonLink}
-              onClick={() => trackShopAction(shop.slug, 'main_button')}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ backgroundColor: mainButtonBg }}
-              className="w-full max-w-xl py-3.5 sm:py-4 px-6 rounded-full font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 text-white shadow-lg active:scale-[0.98] hover:brightness-105 transition-all duration-200 truncate"
-            >
-              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-amber-200 flex-shrink-0" />
-              <span className="truncate max-w-[260px] sm:max-w-md">
-                {shop.buttonText || 'Visit Our Shop'}
-              </span>
-            </a>
+            <div className="w-full max-w-xl bg-white border border-[#EDE8E1] rounded-3xl p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-200">
+              <div className="flex items-start gap-3.5">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center flex-shrink-0 text-[#8C6239]">
+                  <MapPin className="w-5 h-5 text-[#5C3A21]" />
+                </div>
+                <div className="flex-1 min-w-0 text-left">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-[#8C6239] uppercase tracking-wider">
+                      Shop Location
+                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span className="text-[10px] text-stone-400 font-medium">Live Maps</span>
+                  </div>
+                  {shop.address && (
+                    <p className="text-xs sm:text-sm font-semibold text-stone-800 mt-1 leading-snug break-words">
+                      {shop.address}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-3.5 pt-3 border-t border-stone-100 flex items-center gap-2">
+                <a
+                  href={buttonLink}
+                  onClick={() => trackShopAction(shop.slug, 'main_button')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ backgroundColor: mainButtonBg }}
+                  className="flex-1 py-2.5 sm:py-3 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-white shadow-sm hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  <Navigation className="w-3.5 h-3.5" />
+                  <span className="truncate">{shop.buttonText || 'Get Live Directions'}</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </a>
+
+                {shop.address && (
+                  <button
+                    type="button"
+                    onClick={handleCopyAddress}
+                    className="py-2.5 sm:py-3 px-3.5 rounded-2xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-700 font-bold text-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer flex-shrink-0"
+                    title="Copy address"
+                  >
+                    {isAddressCopied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
+                        <span className="text-emerald-700">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-stone-500" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
