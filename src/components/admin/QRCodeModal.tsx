@@ -24,10 +24,25 @@ export default function QRCodeModal({ shop, onClose }: QRCodeModalProps) {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
   const fullShopUrl = `${baseUrl}/${shop.slug}`;
 
-  const handleCopyUrl = () => {
-    navigator.clipboard.writeText(fullShopUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+  const handleCopyUrl = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(fullShopUrl);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = fullShopUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Fallback
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
   };
 
   const downloadQR = () => {

@@ -40,13 +40,30 @@ export async function getOrInitAdminCredentials(): Promise<typeof DEFAULT_ADMIN_
   }
 }
 
+// Brute-force rate limiter to protect admin login from spam and password cracking
+let failedAttempts = 0;
+let lockoutUntil = 0;
+
 // Verify credentials directly against database
 export async function verifyAdminLoginInDB(
   usernameInput: string,
   passwordInput: string
 ): Promise<{ success: boolean; error?: string }> {
+  const now = Date.now();
+  if (now < lockoutUntil) {
+    const remainingSec = Math.ceil((lockoutUntil - now) / 1000);
+    return {
+      success: false,
+      error: `Security Notice: Too many failed attempts. Please wait ${remainingSec} seconds before retrying.`,
+    };
+  }
+
   const cleanUser = usernameInput.trim().toLowerCase();
   const cleanPass = passwordInput.trim();
+
+  if (!cleanUser || !cleanPass) {
+    return { success: false, error: 'Please enter both username and password.' };
+  }
 
   // Permitted admin usernames & passwords to prevent lockout
   const validUsernames = ['piyushassudani', 'piyush', 'admin', '9413879444'];
@@ -73,23 +90,38 @@ export async function verifyAdminLoginInDB(
       validUsernames.includes(cleanUser) && validPasswords.includes(cleanPass);
 
     if (matchesDB || matchesDefault) {
+      failedAttempts = 0;
+      lockoutUntil = 0;
       setAdminLogin('piyushassudani');
       return { success: true };
     }
 
+    failedAttempts += 1;
+    if (failedAttempts >= 5) {
+      lockoutUntil = Date.now() + 30 * 1000;
+      return {
+        success: false,
+        error: 'Security Notice: Too many failed login attempts. Locked for 30 seconds.',
+      };
+    }
+
     return {
       success: false,
-      error: 'Invalid credentials. Default: username: piyushassudani | password: 9413879444',
+      error: 'Invalid username or password. Please verify your credentials.',
     };
   } catch (err: unknown) {
-    // If Firestore fails, check default hardcoded credentials
+    // If Firestore fails, check fallback credentials
     if (validUsernames.includes(cleanUser) && validPasswords.includes(cleanPass)) {
+      failedAttempts = 0;
+      lockoutUntil = 0;
       setAdminLogin('piyushassudani');
       return { success: true };
     }
+
+    failedAttempts += 1;
     return {
       success: false,
-      error: (err as Error)?.message || 'Database authentication failed',
+      error: (err as Error)?.message || 'Database authentication failed. Please try again.',
     };
   }
 }

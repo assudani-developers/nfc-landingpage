@@ -8,11 +8,23 @@ import {
   deleteDoc,
   updateDoc,
   increment,
+  query,
+  where,
+  limit,
 } from 'firebase/firestore';
 
 const LOCAL_STORAGE_KEY = 'tap_tap_nfc_shops_v4';
 
 let memoryShops: Shop[] = [];
+
+// High-speed in-memory TTL caching for zero-latency lookups under heavy NFC tap load
+interface CacheItem<T> {
+  data: T;
+  timestamp: number;
+}
+const slugCache = new Map<string, CacheItem<Shop | null>>();
+let allShopsCache: CacheItem<Shop[]> | null = null;
+const CACHE_TTL_MS = 45 * 1000; // 45 seconds TTL
 
 function withTimeout<T>(promise: Promise<T>, ms = 3000): Promise<T> {
   return Promise.race([
@@ -56,6 +68,11 @@ export function saveLocalShops(shops: Shop[]): void {
 }
 
 export async function getShops(): Promise<Shop[]> {
+  const now = Date.now();
+  if (allShopsCache && now - allShopsCache.timestamp < CACHE_TTL_MS) {
+    return allShopsCache.data;
+  }
+
   // If Firestore is configured, fetch live from Firestore
   if (isFirebaseConfigured && db) {
     try {
@@ -68,6 +85,7 @@ export async function getShops(): Promise<Shop[]> {
 
       if (fetched.length > 0) {
         saveLocalShops(fetched);
+        allShopsCache = { data: fetched, timestamp: now };
         return fetched;
       } else {
         // If Firestore has 0 shops, check if client has local shops to sync to cloud!
@@ -80,8 +98,10 @@ export async function getShops(): Promise<Shop[]> {
               // ignore
             }
           }
+          allShopsCache = { data: local, timestamp: now };
           return local;
         }
+        allShopsCache = { data: [], timestamp: now };
         return [];
       }
     } catch (err) {
@@ -89,34 +109,44 @@ export async function getShops(): Promise<Shop[]> {
     }
   }
 
-  return getLocalShops();
+  const local = getLocalShops();
+  allShopsCache = { data: local, timestamp: now };
+  return local;
 }
 
 export async function getShopBySlug(slug: string): Promise<Shop | null> {
   const normalizedSlug = slug.toLowerCase().trim();
+  const now = Date.now();
 
-  // Try Firestore first if configured
+  // Check in-memory fast cache first
+  const cached = slugCache.get(normalizedSlug);
+  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  // Try Firestore targeted indexed query with limit(1)
   if (isFirebaseConfigured && db) {
     try {
-      const colRef = collection(db, 'shops');
-      const snap = await withTimeout(getDocs(colRef), 3000);
-      let match: Shop | null = null;
-      snap.forEach((docItem) => {
-        const data = docItem.data() as Shop;
-        if (data.slug.toLowerCase().trim() === normalizedSlug) {
-          match = data;
-        }
-      });
-      if (match) {
-        return match;
+      const q = query(
+        collection(db, 'shops'),
+        where('slug', '==', normalizedSlug),
+        limit(1)
+      );
+      const snap = await withTimeout(getDocs(q), 3000);
+      if (!snap.empty) {
+        const found = snap.docs[0].data() as Shop;
+        slugCache.set(normalizedSlug, { data: found, timestamp: now });
+        return found;
       }
     } catch (err) {
-      console.warn("Firestore getShopBySlug using fallback cache:", (err as Error)?.message);
+      console.warn("Firestore getShopBySlug query error, checking fallback:", (err as Error)?.message);
     }
   }
 
+  // Fallback to local storage
   const shops = getLocalShops();
   const found = shops.find((s) => s.slug.toLowerCase().trim() === normalizedSlug);
+  slugCache.set(normalizedSlug, { data: found || null, timestamp: now });
   return found || null;
 }
 
@@ -142,6 +172,10 @@ export async function saveShop(shop: Shop): Promise<Shop> {
     },
     showReferral: shop.showReferral !== false,
   };
+
+  // Invalidate and refresh cache
+  allShopsCache = null;
+  slugCache.set(shopToSave.slug, { data: shopToSave, timestamp: now });
 
   // 1. Sync to local storage immediately
   const current = getLocalShops();
@@ -169,6 +203,9 @@ export async function saveShop(shop: Shop): Promise<Shop> {
 }
 
 export async function deleteShop(id: string): Promise<boolean> {
+  allShopsCache = null;
+  slugCache.clear();
+
   if (isFirebaseConfigured && db) {
     try {
       await deleteDoc(doc(db, 'shops', id));
@@ -187,6 +224,9 @@ export async function deleteShop(id: string): Promise<boolean> {
  * Wipe all shops completely to give the admin a 100% clean, blank dashboard.
  */
 export async function clearAllShops(): Promise<void> {
+  allShopsCache = null;
+  slugCache.clear();
+
   const current = getLocalShops();
   if (isFirebaseConfigured && db) {
     try {

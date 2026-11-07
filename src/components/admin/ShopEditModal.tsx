@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Shop, ShopLink, LinkType, ShopTheme } from '@/types';
 import { LocalBrandIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';
 import { compressAndConvertToBase64 } from '@/lib/imageUtils';
+import { getLocalShops } from '@/lib/db';
 import {
   X,
   Plus,
@@ -24,19 +25,19 @@ interface ShopEditModalProps {
 }
 
 const PRESET_LOGOS = [
-  { label: 'Artisan Cafe', url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&auto=format&fit=crop&q=80' },
-  { label: 'Luxury Salon', url: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&auto=format&fit=crop&q=80' },
-  { label: 'Fine Jewellery', url: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&auto=format&fit=crop&q=80' },
-  { label: 'Boutique Store', url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&auto=format&fit=crop&q=80' },
-  { label: 'Bakery & Sweets', url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&auto=format&fit=crop&q=80' },
-  { label: 'Dental Clinic', url: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=300&auto=format&fit=crop&q=80' },
+  { label: 'Artisan Cafe', url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&auto=format&fit=crop&fm=webp&q=80' },
+  { label: 'Luxury Salon', url: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&auto=format&fit=crop&fm=webp&q=80' },
+  { label: 'Fine Jewellery', url: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&auto=format&fit=crop&fm=webp&q=80' },
+  { label: 'Boutique Store', url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&auto=format&fit=crop&fm=webp&q=80' },
+  { label: 'Bakery & Sweets', url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&auto=format&fit=crop&fm=webp&q=80' },
+  { label: 'Dental Clinic', url: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=300&auto=format&fit=crop&fm=webp&q=80' },
 ];
 
 const PRESET_COVERS = [
-  { label: 'Urban Cafe Storefront', url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=900&auto=format&fit=crop&q=80' },
-  { label: 'Luxury Salon Studio', url: 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=900&auto=format&fit=crop&q=80' },
-  { label: 'Jewellers Showroom', url: 'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?w=900&auto=format&fit=crop&q=80' },
-  { label: 'Boutique Fashion Front', url: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=900&auto=format&fit=crop&q=80' },
+  { label: 'Urban Cafe Storefront', url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=900&auto=format&fit=crop&fm=webp&q=80' },
+  { label: 'Luxury Salon Studio', url: 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=900&auto=format&fit=crop&fm=webp&q=80' },
+  { label: 'Jewellers Showroom', url: 'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?w=900&auto=format&fit=crop&fm=webp&q=80' },
+  { label: 'Boutique Fashion Front', url: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=900&auto=format&fit=crop&fm=webp&q=80' },
 ];
 
 const COLOR_PRESETS: { name: string; color: string; theme: ShopTheme }[] = [
@@ -247,11 +248,21 @@ export default function ShopEditModal({
   const handleCustomLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file (JPG, PNG, or WebP).');
+        return;
+      }
+      if (file.size > 15 * 1024 * 1024) {
+        setError('Image file is too large. Please select an image under 15MB.');
+        return;
+      }
       try {
         const base64Data = await compressAndConvertToBase64(file, 400, 400, 0.85);
         setLogoUrl(base64Data);
+        setError(null);
       } catch (err) {
         console.error('Failed to compress logo:', err);
+        setError('Could not process image. Please try a different photo.');
       }
     }
   };
@@ -259,11 +270,21 @@ export default function ShopEditModal({
   const handleCustomCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file (JPG, PNG, or WebP).');
+        return;
+      }
+      if (file.size > 15 * 1024 * 1024) {
+        setError('Cover banner is too large. Please select an image under 15MB.');
+        return;
+      }
       try {
         const base64Data = await compressAndConvertToBase64(file, 1000, 600, 0.82);
         setCoverUrl(base64Data);
+        setError(null);
       } catch (err) {
         console.error('Failed to compress cover:', err);
+        setError('Could not process banner photo. Please try a different image.');
       }
     }
   };
@@ -286,8 +307,20 @@ export default function ShopEditModal({
         .toLowerCase()
         .replace(/[^a-z0-9_-]/g, '-')
         .replace(/^-+|-+$/g, '') || 'shop';
-      setSlug(finalSlug);
+    } else {
+      finalSlug = finalSlug.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/^-+|-+$/g, '');
     }
+
+    // Auto-resolve slug collision so shops never overwrite each other
+    const existingShops = getLocalShops();
+    let uniqueSlug = finalSlug;
+    let collisionCounter = 2;
+    while (existingShops.some((s) => s.slug.toLowerCase().trim() === uniqueSlug && s.id !== initialShop?.id)) {
+      uniqueSlug = `${finalSlug}-${collisionCounter}`;
+      collisionCounter += 1;
+    }
+    finalSlug = uniqueSlug;
+    setSlug(finalSlug);
 
     setIsSubmitting(true);
     setError(null);
@@ -310,6 +343,24 @@ export default function ShopEditModal({
           finalUrl = `https://www.google.com/search?q=${encodeURIComponent(name.trim() + ' reviews')}`;
         } else if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
           finalUrl = `https://${finalUrl}`;
+        }
+      } else if (link.type === 'instagram') {
+        if (!finalUrl || finalUrl === 'https://' || finalUrl === 'https://...') {
+          continue;
+        }
+        // Auto-format handle to full Instagram URL
+        const cleanHandle = finalUrl.replace(/^https?:\/\/(www\.)?instagram\.com\/?/i, '').replace(/^@/, '').trim();
+        if (cleanHandle) {
+          finalUrl = `https://instagram.com/${cleanHandle}`;
+        }
+      } else if (link.type === 'facebook') {
+        if (!finalUrl || finalUrl === 'https://' || finalUrl === 'https://...') {
+          continue;
+        }
+        // Auto-format page handle to full Facebook URL
+        const cleanPage = finalUrl.replace(/^https?:\/\/(www\.)?facebook\.com\/?/i, '').replace(/^@/, '').trim();
+        if (cleanPage) {
+          finalUrl = `https://facebook.com/${cleanPage}`;
         }
       } else {
         // Social / Website links
@@ -339,16 +390,25 @@ export default function ShopEditModal({
       });
     }
 
+    // Normalize main button URL
+    let finalButtonUrl = buttonUrl.trim();
+    if (finalButtonUrl && !finalButtonUrl.startsWith('http://') && !finalButtonUrl.startsWith('https://')) {
+      finalButtonUrl = `https://${finalButtonUrl}`;
+    }
+    if (!finalButtonUrl) {
+      finalButtonUrl = `https://maps.google.com/?q=${encodeURIComponent(name.trim() + (address ? ' ' + address.trim() : ''))}`;
+    }
+
     try {
       const shopToSave: Shop = {
         id: initialShop?.id || `shop-${Date.now()}`,
         name: name.trim(),
-        slug: finalSlug.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/^-+|-+$/g, ''),
+        slug: finalSlug,
         tagline: tagline.trim() || 'Welcome to our store',
         category: category.trim() || 'Store',
         address: address.trim(),
         buttonText: buttonText.trim() || 'Visit Our Shop',
-        buttonUrl: buttonUrl.trim() || `https://maps.google.com/?q=${encodeURIComponent(name)}`,
+        buttonUrl: finalButtonUrl,
         themeColor: themeColor || '#5C3A21',
         hasCover,
         coverUrl: hasCover ? (coverUrl.trim() || PRESET_COVERS[0].url) : '',
@@ -448,7 +508,7 @@ export default function ShopEditModal({
                 data-form-type="other"
                 value={name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="e.g. The Urban Café or Assudani Stores"
+                placeholder="e.g. The Artisan Cafe, Elite Studio, Royal Boutique"
                 className={`w-full bg-[#FAF7F2] border rounded-xl px-3.5 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition ${
                   error && !name.trim()
                     ? 'border-rose-500 ring-2 ring-rose-200 bg-rose-50/30'
@@ -1174,7 +1234,7 @@ export default function ShopEditModal({
                                   }));
                                   handleUpdateLink(link.id, { url: buildWhatsAppUrl(val, currentMsg) });
                                 }}
-                                placeholder="Enter 10-digit number (e.g. 9413879444)"
+                                placeholder="Enter 10-digit number (e.g. 9876543210)"
                                 className="w-full px-2.5 py-1.5 text-xs text-stone-900 font-mono font-bold focus:outline-none"
                               />
                             </div>
@@ -1226,7 +1286,7 @@ export default function ShopEditModal({
                                 handleUpdateLink(link.id, { url: `https://${val}` });
                               }
                             }}
-                            placeholder={isGoogleReview ? 'Google Review link or Place ID (optional)' : 'e.g. assudanigroup.online or https://...'}
+                            placeholder={isGoogleReview ? 'Google Review link or Place ID (optional)' : 'e.g. yourstore.com or https://...'}
                             className="w-full bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs text-stone-900 font-mono focus:outline-none focus:border-[#5C3A21]"
                           />
                         </div>

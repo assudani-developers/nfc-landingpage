@@ -66,35 +66,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
           </p>
         </div>
 
-        {/* Quick Credentials Info & 1-Click Sign In */}
-        <div className="mb-4 p-3 rounded-2xl bg-[#F8F5EE] border border-[#E8DFC8] flex items-center justify-between gap-2">
-          <div className="text-[11px] text-stone-700">
-            <span className="font-bold text-[#5C3A21]">Admin Credentials:</span>
-            <div className="font-mono text-stone-600 mt-0.5">
-              User: <span className="font-bold text-stone-900">piyushassudani</span> • Pass: <span className="font-bold text-stone-900">9413879444</span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={async () => {
-              setUsername('piyushassudani');
-              setPassword('9413879444');
-              setLoading(true);
-              setError(null);
-              const result = await verifyAdminLoginInDB('piyushassudani', '9413879444');
-              if (result.success) {
-                onSuccess();
-              } else {
-                setError(result.error || 'Authentication failed');
-                setLoading(false);
-              }
-            }}
-            className="px-3 py-1.5 rounded-xl bg-[#5C3A21] hover:bg-[#472c19] text-white text-xs font-bold transition shadow-xs flex-shrink-0 active:scale-95"
-          >
-            ⚡ 1-Click Sign In
-          </button>
-        </div>
-
         {error && (
           <div className="mb-5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs text-center font-medium">
             {error}
