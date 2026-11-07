@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Shop, ShopLink } from '@/types';
-import { LocalBrandIcon } from '@/components/icons/BrandIcons';
+import { LocalBrandIcon, NfcWaveIcon } from '@/components/icons/BrandIcons';
 import {
   CurvedWaveMask,
   CoffeeCupIcon,
@@ -76,10 +76,21 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
   };
 
   const hasCover = shop.hasCover !== false && Boolean(shop.coverUrl);
-  const buttonLink = shop.buttonUrl || (shop.address ? `https://maps.google.com/?q=${encodeURIComponent(shop.name + ' ' + shop.address)}` : 'https://maps.google.com');
+  const buttonLink =
+    shop.buttonUrl ||
+    (shop.address
+      ? `https://maps.google.com/?q=${encodeURIComponent(shop.name + ' ' + shop.address)}`
+      : 'https://maps.google.com');
   const mainButtonBg = shop.themeColor || '#5C3A21';
 
-  const googleReviewLink = shop.links.find((l) => l.type === 'google_review') || (shop.links[0]?.type === 'google_review' ? shop.links[0] : null);
+  // Determine if the main action button should show
+  const showMainButton = Boolean(
+    shop.buttonText?.trim() || shop.buttonUrl?.trim() || shop.address?.trim()
+  );
+
+  const googleReviewLink =
+    shop.links.find((l) => l.type === 'google_review') ||
+    (shop.links[0]?.type === 'google_review' ? shop.links[0] : null);
   const otherLinks = googleReviewLink
     ? shop.links.filter((l) => l.id !== googleReviewLink.id)
     : shop.links;
@@ -106,7 +117,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
       </div>
 
       {/* Main Centered Responsive Card Shell */}
-      <div className="w-full max-w-md sm:max-w-xl md:max-w-2xl lg:max-w-3xl min-h-dvh min-h-[100dvh] sm:min-h-[740px] bg-[#FAF7F2] relative z-10 flex flex-col items-center sm:my-6 sm:rounded-[44px] sm:shadow-2xl sm:shadow-stone-900/12 sm:border sm:border-[#EDE8E1] overflow-hidden">
+      <div className="w-full max-w-md sm:max-w-xl md:max-w-2xl bg-[#FAF7F2] relative z-10 flex flex-col items-center sm:my-auto sm:rounded-[44px] sm:shadow-2xl sm:shadow-stone-900/12 sm:border sm:border-[#EDE8E1] overflow-hidden">
         
         {/* ============================================================== */}
         {/* 1. HEADER SECTION: COVER BANNER OR CLEAN MINIMALIST AVATAR     */}
@@ -114,7 +125,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
         {hasCover ? (
           <>
             {/* Storefront Cover Banner with Wave Mask */}
-            <div className="relative w-full h-52 sm:h-64 md:h-72 lg:h-80 overflow-hidden bg-stone-900/5 flex-shrink-0">
+            <div className="relative w-full h-48 sm:h-56 md:h-64 lg:h-72 overflow-hidden bg-stone-900/5 flex-shrink-0">
               {/* Ambient Blurred Backdrop */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -130,7 +141,10 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
                 alt={shop.name}
                 style={{
                   objectPosition: `${shop.coverPositionX ?? 50}% ${shop.coverPositionY ?? 50}%`,
-                  transform: (shop.coverScale && shop.coverScale !== 100) ? `scale(${shop.coverScale / 100})` : undefined,
+                  transform:
+                    shop.coverScale && shop.coverScale !== 100
+                      ? `scale(${shop.coverScale / 100})`
+                      : undefined,
                 }}
                 className={`relative w-full h-full object-center transition-all duration-300 ${
                   shop.coverFit === 'contain'
@@ -147,17 +161,17 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
             </div>
 
             {/* Floating Logo (Centered Overlapping Curve) */}
-            <div className="relative -mt-14 sm:-mt-16 md:-mt-18 z-20 flex flex-col items-center">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-[26px] sm:rounded-[30px] bg-white border-2 border-[#EDE8E1] p-1.5 shadow-xl shadow-stone-300/60 flex items-center justify-center overflow-hidden">
+            <div className="relative -mt-12 sm:-mt-14 md:-mt-16 z-20 flex flex-col items-center">
+              <div className="w-22 h-22 sm:w-26 sm:h-26 md:w-28 md:h-28 rounded-[24px] sm:rounded-[28px] bg-white border-2 border-[#EDE8E1] p-1.5 shadow-xl shadow-stone-300/60 flex items-center justify-center overflow-hidden">
                 {shop.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={shop.logoUrl}
                     alt={shop.name}
-                    className="w-full h-full object-cover rounded-[20px] sm:rounded-[24px]"
+                    className="w-full h-full object-cover rounded-[18px] sm:rounded-[22px]"
                   />
                 ) : (
-                  <div className="w-full h-full bg-[#FAF7F2] rounded-[20px] sm:rounded-[24px] flex items-center justify-center">
+                  <div className="w-full h-full bg-[#FAF7F2] rounded-[18px] sm:rounded-[22px] flex items-center justify-center">
                     <CoffeeCupIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#5C3A21]" />
                   </div>
                 )}
@@ -169,23 +183,29 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
           <div className="w-full relative pt-8 sm:pt-10 pb-2 px-6 flex flex-col items-center overflow-hidden">
             {/* Ambient subtle radial glow in shop's theme color */}
             <div
-              className="absolute -top-10 left-1/2 -translate-x-1/2 w-80 h-40 rounded-full blur-3xl opacity-25 pointer-events-none"
+              className="absolute -top-10 left-1/2 -translate-x-1/2 w-80 h-40 rounded-full blur-3xl opacity-20 pointer-events-none"
               style={{ backgroundColor: shop.themeColor || '#5C3A21' }}
             />
 
+            {/* Top Verified NFC Pill Badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#EDE8E1] text-[10px] sm:text-xs font-bold text-stone-600 shadow-2xs mb-3">
+              <NfcWaveIcon className="w-3.5 h-3.5 text-[#5C3A21]" />
+              <span>Official Smart NFC Profile</span>
+            </div>
+
             {/* Centered Large Featured Logo / Monogram */}
             <div className="relative group">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-[28px] sm:rounded-[32px] bg-white border-2 border-[#EDE8E1] p-1.5 shadow-xl shadow-stone-300/40 flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-105">
+              <div className="w-22 h-22 sm:w-26 sm:h-26 md:w-28 md:h-28 rounded-[26px] sm:rounded-[30px] bg-white border-2 border-[#EDE8E1] p-1.5 shadow-xl shadow-stone-300/40 flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-105">
                 {shop.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={shop.logoUrl}
                     alt={shop.name}
-                    className="w-full h-full object-cover rounded-[22px] sm:rounded-[26px]"
+                    className="w-full h-full object-cover rounded-[20px] sm:rounded-[24px]"
                   />
                 ) : (
                   <div
-                    className="w-full h-full rounded-[22px] sm:rounded-[26px] flex items-center justify-center font-black text-2xl sm:text-3xl text-white shadow-inner"
+                    className="w-full h-full rounded-[20px] sm:rounded-[24px] flex items-center justify-center font-black text-2xl sm:text-3xl text-white shadow-inner"
                     style={{ backgroundColor: shop.themeColor || '#5C3A21' }}
                   >
                     {shop.name.slice(0, 2).toUpperCase()}
@@ -202,14 +222,14 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
         {/* ============================================================== */}
         {/* 2. SHOP NAME, CATEGORIES, RATING & DESCRIPTION                 */}
         {/* ============================================================== */}
-        <div className={`w-full px-5 sm:px-6 text-center z-10 ${hasCover ? 'mt-3 sm:mt-4' : 'mt-4 sm:mt-5'}`}>
+        <div className={`w-full px-5 sm:px-6 text-center z-10 ${hasCover ? 'mt-2.5 sm:mt-3' : 'mt-3 sm:mt-4'}`}>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-stone-900 tracking-tight leading-tight break-words max-w-full">
             {shop.name}
           </h1>
 
-          <div className="mt-2.5 flex items-center justify-center gap-2 sm:gap-2.5 flex-wrap">
+          <div className="mt-2 flex items-center justify-center gap-2 flex-wrap">
             {shop.category && (
-              <span className="text-xs sm:text-sm font-semibold text-[#8C6239] tracking-wide px-3 py-1 rounded-full bg-[#F3ECE4] border border-[#E5DACD] max-w-[200px] truncate">
+              <span className="text-xs font-bold text-[#8C6239] tracking-wide px-3 py-1 rounded-full bg-[#F3ECE4] border border-[#E5DACD] max-w-[170px] sm:max-w-[220px] truncate">
                 {shop.category}
               </span>
             )}
@@ -220,24 +240,33 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
             </span>
           </div>
 
+          {/* Clickable Address that opens Google Maps directly */}
           {shop.address && (
-            <div className="mt-2 flex items-center justify-center gap-1.5 text-xs text-stone-500 font-medium px-2">
-              <MapPin className="w-3.5 h-3.5 text-[#5C3A21] flex-shrink-0" />
-              <span className="truncate max-w-[260px] sm:max-w-md">{shop.address}</span>
-            </div>
+            <a
+              href={`https://maps.google.com/?q=${encodeURIComponent(shop.name + ' ' + shop.address)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center justify-center gap-1.5 text-xs text-stone-500 hover:text-stone-900 font-medium px-2 group transition"
+              title="Open location in Google Maps"
+            >
+              <MapPin className="w-3.5 h-3.5 text-[#5C3A21] flex-shrink-0 group-hover:scale-110 transition-transform" />
+              <span className="truncate max-w-[250px] sm:max-w-md group-hover:underline">
+                {shop.address}
+              </span>
+            </a>
           )}
 
           {shop.tagline && (
-            <p className="mt-2.5 text-xs sm:text-sm md:text-base text-stone-600 max-w-lg mx-auto leading-relaxed break-words px-2">
+            <p className="mt-2 text-xs sm:text-sm text-stone-600 max-w-lg mx-auto leading-relaxed break-words px-3">
               {shop.tagline}
             </p>
           )}
         </div>
 
         {/* ============================================================== */}
-        {/* 4. SOCIAL & REVIEW BUTTONS (PRIMARY GOOGLE REVIEW + CHANNELS)   */}
+        {/* 3. SOCIAL & REVIEW BUTTONS (PRIMARY GOOGLE REVIEW + CHANNELS)   */}
         {/* ============================================================== */}
-        <div className="w-full px-4 sm:px-8 md:px-10 mt-6 sm:mt-7 z-10 flex flex-col items-center">
+        <div className="w-full px-4 sm:px-8 md:px-10 mt-5 sm:mt-6 z-10 flex flex-col items-center">
           {/* PRIMARY GOOGLE REVIEW HERO CARD */}
           {googleReviewLink && (
             <div className="max-w-xl mx-auto w-full">
@@ -246,15 +275,18 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
                 onClick={(e) => handleLinkClick(e, googleReviewLink)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group w-full bg-white hover:bg-[#FDFCFB] border-2 border-amber-200/90 hover:border-amber-400 rounded-3xl p-3.5 sm:p-5 flex items-center justify-between shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
+                className="group w-full bg-white hover:bg-[#FDFCFB] border-2 border-amber-300/90 hover:border-amber-400 rounded-3xl p-3.5 sm:p-4 md:p-5 flex items-center justify-between shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
               >
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-xs">
-                    <LocalBrandIcon type={googleReviewLink.type} className="w-7 h-7 sm:w-10 sm:h-10" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+                    <LocalBrandIcon
+                      type={googleReviewLink.type}
+                      className="w-7 h-7 sm:w-9 sm:h-9"
+                    />
                   </div>
                   <div className="text-left min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-extrabold text-xs sm:text-base md:text-lg text-stone-900 group-hover:text-[#5C3A21] transition-colors truncate max-w-[150px] sm:max-w-xs">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                      <span className="font-extrabold text-xs sm:text-base md:text-lg text-stone-900 group-hover:text-[#5C3A21] transition-colors truncate max-w-[140px] sm:max-w-xs">
                         {googleReviewLink.title}
                       </span>
                       <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-950 text-[10px] sm:text-xs font-black border border-amber-300/80 inline-flex items-center gap-1 shadow-2xs">
@@ -268,7 +300,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-[#5C3A21] group-hover:bg-[#472c19] text-white text-xs sm:text-sm font-bold shadow-xs transition flex-shrink-0 ml-2 sm:ml-3">
+                <div className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-[#5C3A21] group-hover:bg-[#472c19] text-white text-xs sm:text-sm font-bold shadow-xs transition flex-shrink-0 ml-2">
                   <span>Rate Us</span>
                   <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform" />
                 </div>
@@ -278,60 +310,77 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
 
           {/* ADDITIONAL SOCIAL / CONTACT LINKS (IF CONFIGURED) */}
           {otherLinks.length > 0 && (
-            <div className="max-w-xl mx-auto w-full mt-3 sm:mt-3.5">
+            <div className="max-w-xl mx-auto w-full mt-2.5 sm:mt-3">
               <div
-                className={`grid gap-2 sm:gap-3 ${
+                className={`grid gap-2 sm:gap-2.5 ${
                   otherLinks.length === 1
                     ? 'grid-cols-1'
                     : otherLinks.length === 2
                     ? 'grid-cols-2'
                     : otherLinks.length === 3
-                    ? 'grid-cols-3'
-                    : 'grid-cols-2 sm:grid-cols-4'
+                    ? 'grid-cols-2 sm:grid-cols-3'
+                    : otherLinks.length === 4
+                    ? 'grid-cols-2 sm:grid-cols-4'
+                    : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
                 }`}
               >
-                {otherLinks.map((link: ShopLink) => (
-                  <a
-                    key={link.id}
-                    href={link.url}
-                    onClick={(e) => handleLinkClick(e, link)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group bg-white hover:bg-[#FDFCFB] border border-[#EDE8E1] hover:border-stone-300 rounded-2xl p-2.5 sm:p-3.5 flex items-center justify-center gap-2 shadow-2xs hover:shadow-xs transition-all duration-200 active:scale-95 min-w-0"
-                  >
-                    <LocalBrandIcon type={link.type} className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs sm:text-sm font-bold text-stone-800 truncate max-w-[110px] sm:max-w-none">
-                      {link.title}
-                    </span>
-                  </a>
-                ))}
+                {otherLinks.map((link: ShopLink, index: number) => {
+                  const isLastOdd =
+                    otherLinks.length % 2 === 1 &&
+                    index === otherLinks.length - 1 &&
+                    otherLinks.length !== 1;
+                  return (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      onClick={(e) => handleLinkClick(e, link)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`group bg-white hover:bg-[#FDFCFB] border border-[#EDE8E1] hover:border-stone-300 rounded-2xl py-2.5 px-3 sm:py-3 sm:px-4 flex items-center justify-center gap-2 shadow-2xs hover:shadow-xs transition-all duration-200 active:scale-95 min-w-0 ${
+                        isLastOdd ? 'col-span-2 sm:col-span-1' : ''
+                      }`}
+                    >
+                      <LocalBrandIcon
+                        type={link.type}
+                        className="w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0 group-hover:scale-110 transition-transform"
+                      />
+                      <span className="text-xs sm:text-sm font-bold text-stone-800 truncate">
+                        {link.title}
+                      </span>
+                    </a>
+                  );
+                })}
               </div>
             </div>
           )}
         </div>
 
         {/* ============================================================== */}
-        {/* 5. VISIT OUR SHOP PILL BUTTON (CUSTOMIZED FROM DB)             */}
+        {/* 4. VISIT OUR SHOP PILL BUTTON (OPTIONAL / CUSTOM FROM DB)       */}
         {/* ============================================================== */}
-        <div className="w-full px-4 sm:px-8 md:px-10 mt-5 sm:mt-6 z-10 flex justify-center">
-          <a
-            href={buttonLink}
-            onClick={() => trackShopAction(shop.slug, 'main_button')}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ backgroundColor: mainButtonBg }}
-            className="w-full max-w-xl py-3.5 sm:py-4 px-6 rounded-full font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 text-white shadow-lg active:scale-[0.98] hover:brightness-105 transition-all duration-200 truncate"
-          >
-            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-amber-200 flex-shrink-0" />
-            <span className="truncate max-w-[260px] sm:max-w-md">{shop.buttonText || 'Visit Our Shop'}</span>
-          </a>
-        </div>
+        {showMainButton && (
+          <div className="w-full px-4 sm:px-8 md:px-10 mt-4 sm:mt-5 z-10 flex justify-center">
+            <a
+              href={buttonLink}
+              onClick={() => trackShopAction(shop.slug, 'main_button')}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ backgroundColor: mainButtonBg }}
+              className="w-full max-w-xl py-3.5 sm:py-4 px-6 rounded-full font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 text-white shadow-lg active:scale-[0.98] hover:brightness-105 transition-all duration-200 truncate"
+            >
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-amber-200 flex-shrink-0" />
+              <span className="truncate max-w-[260px] sm:max-w-md">
+                {shop.buttonText || 'Visit Our Shop'}
+              </span>
+            </a>
+          </div>
+        )}
 
         {/* ============================================================== */}
-        {/* 6. REFERRAL: SUBTLE DEVELOPER FOOTER ATTRIBUTION                */}
+        {/* 5. REFERRAL: SUBTLE DEVELOPER FOOTER ATTRIBUTION                */}
         {/* ============================================================== */}
         {shop.showReferral !== false && (
-          <footer className="w-full px-5 sm:px-8 md:px-10 mt-auto pt-8 pb-8 sm:pb-9 z-10 flex flex-col items-center text-center">
+          <footer className="w-full px-5 sm:px-8 md:px-10 mt-6 sm:mt-8 pb-8 sm:pb-9 z-10 flex flex-col items-center text-center">
             {/* Subtle, understated link to Digital Solutions */}
             <Link
               href="/services"
