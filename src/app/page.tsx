@@ -9,13 +9,9 @@ import {
 import {
   Phone,
   Sparkles,
-  Smartphone,
-  Star,
   ExternalLink,
   ChevronRight,
   ShieldCheck,
-  Zap,
-  Globe,
   Layers,
   Check,
   TrendingUp,
@@ -30,6 +26,7 @@ import {
 import TapSimulator from '@/components/landing/TapSimulator';
 import FaqAccordion from '@/components/landing/FaqAccordion';
 import MobileStickyBar from '@/components/landing/MobileStickyBar';
+import HeroSection from '@/components/landing/HeroSection';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,144 +88,11 @@ export default async function HomePage() {
       </header>
 
       {/* Main Container */}
-      <main className="w-full max-w-5xl px-4 sm:px-6 py-6 sm:py-12 flex flex-col items-center text-center z-10 space-y-16 sm:space-y-24">
+      <main className="w-full max-w-6xl px-4 sm:px-6 py-4 sm:py-8 flex flex-col items-center text-center z-10 space-y-16 sm:space-y-24">
         {/* ========================================================= */}
-        {/* HERO SECTION                                              */}
+        {/* HERO SECTION (Split 2-Column Luxury Layout)               */}
         {/* ========================================================= */}
-        <section className="w-full flex flex-col items-center text-center space-y-6 sm:space-y-8 pt-2 sm:pt-4">
-          {/* Top Pill Announcement */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#EDE8E1] shadow-xs text-xs font-bold text-stone-800">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Zero App Needed • 1-Tap Contactless • Works On All Phones</span>
-          </div>
-
-          {/* Headline */}
-          <div className="space-y-3 max-w-3xl">
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-stone-900 tracking-tight leading-[1.12]">
-              Turn Every Customer Visit Into A{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D97706] via-[#B45309] to-[#5C3A21]">
-                5-Star Google Review.
-              </span>
-            </h1>
-
-            <p className="text-xs sm:text-base text-stone-600 max-w-2xl mx-auto leading-relaxed">
-              Customer sirf apna smartphone counter standee par touch karega aur seedhe aapki shop ka{' '}
-              <strong className="text-stone-900 font-bold">5-Star Google Review</strong> rating dialog khulega.
-              Na koi spelling type karne ka jhanjhat, na shop dhoondhne ka aalas.
-            </p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-md mx-auto pt-2">
-            <a
-              href="https://wa.me/919413879444?text=Hello%20Piyush%2C%20mujhe%20bhi%20apni%20shop%20ke%20liye%20Smart%20NFC%20Google%20Review%20Standee%20order%20karna%20hai."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto py-3.5 px-6 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#25D366]/25 transition active:scale-[0.98]"
-            >
-              <WhatsAppIcon className="w-4 h-4" />
-              <span>Order Custom Standee on WhatsApp</span>
-            </a>
-
-            <a
-              href="tel:+919413879444"
-              className="w-full sm:w-auto py-3.5 px-6 rounded-2xl bg-[#5C3A21] hover:bg-[#472c19] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#5C3A21]/25 transition active:scale-[0.98]"
-            >
-              <Phone className="w-4 h-4 text-amber-200" />
-              <span>Call: +91 9413879444</span>
-            </a>
-          </div>
-
-          {/* Micro Trust Proofs */}
-          <div className="flex items-center justify-center gap-4 sm:gap-6 text-[11px] sm:text-xs text-stone-500 font-medium flex-wrap pt-1">
-            <span className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-              <span>iPhone &amp; Android Ready</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-              <span>Zero Monthly Fees</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-              <span>All India Express Delivery</span>
-            </span>
-          </div>
-
-          {/* HERO VISUAL CENTERPIECE (Photorealistic Acrylic & Gold Standee) */}
-          <div className="w-full max-w-3xl pt-4">
-            <div className="relative rounded-3xl overflow-hidden border-2 border-amber-200/60 shadow-2xl shadow-stone-300/60 bg-gradient-to-b from-stone-100 via-white to-amber-50/20 group">
-              <Image
-                src="/images/hero-standee.webp"
-                alt="Smart NFC Google Review Acrylic & Gold Standee on Cafe Counter"
-                width={1200}
-                height={896}
-                priority
-                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-              />
-
-              {/* Glassmorphism Floating Overlay Pill */}
-              <div className="absolute bottom-3 sm:bottom-5 left-3 sm:left-5 right-3 sm:right-5 p-3 sm:p-4 rounded-2xl bg-black/60 backdrop-blur-md text-white border border-white/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 flex-shrink-0">
-                    <NfcWaveIcon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-extrabold text-white">
-                      Crystal Acrylic &amp; Brushed Gold Standee
-                    </h4>
-                    <p className="text-[10px] sm:text-xs text-stone-300">
-                      Dual NFC Chip + HD QR Code • 5-Second Contactless Google Rating
-                    </p>
-                  </div>
-                </div>
-
-                <a
-                  href="#simulator"
-                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white text-stone-900 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-amber-100 transition shadow-sm flex-shrink-0"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Try Tap Simulator</span>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* 4 Core Pillars Grid */}
-          <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-4">
-            <div className="p-4 rounded-2xl bg-white border border-[#EDE8E1] shadow-2xs text-left">
-              <div className="w-8 h-8 rounded-xl bg-amber-100/70 text-[#5C3A21] flex items-center justify-center mb-2">
-                <Zap className="w-4 h-4 text-amber-700" />
-              </div>
-              <h3 className="text-xs sm:text-sm font-extrabold text-stone-900">0.5s Fast Read</h3>
-              <p className="text-[11px] text-stone-500 mt-0.5">Instant tap response with zero lag.</p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-white border border-[#EDE8E1] shadow-2xs text-left">
-              <div className="w-8 h-8 rounded-xl bg-emerald-100/70 text-emerald-800 flex items-center justify-center mb-2">
-                <Star className="w-4 h-4 fill-emerald-600 text-emerald-600" />
-              </div>
-              <h3 className="text-xs sm:text-sm font-extrabold text-stone-900">10x More Reviews</h3>
-              <p className="text-[11px] text-stone-500 mt-0.5">Eliminates 99% of customer laziness.</p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-white border border-[#EDE8E1] shadow-2xs text-left">
-              <div className="w-8 h-8 rounded-xl bg-blue-100/70 text-blue-800 flex items-center justify-center mb-2">
-                <Smartphone className="w-4 h-4 text-blue-700" />
-              </div>
-              <h3 className="text-xs sm:text-sm font-extrabold text-stone-900">Zero App Needed</h3>
-              <p className="text-[11px] text-stone-500 mt-0.5">Works natively on iOS &amp; Android.</p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-white border border-[#EDE8E1] shadow-2xs text-left">
-              <div className="w-8 h-8 rounded-xl bg-purple-100/70 text-purple-800 flex items-center justify-center mb-2">
-                <Globe className="w-4 h-4 text-purple-700" />
-              </div>
-              <h3 className="text-xs sm:text-sm font-extrabold text-stone-900">Dynamic Cloud URL</h3>
-              <p className="text-[11px] text-stone-500 mt-0.5">Change phone &amp; links anytime.</p>
-            </div>
-          </div>
-        </section>
+        <HeroSection />
 
         {/* ========================================================= */}
         {/* INTERACTIVE TAP SIMULATOR SECTION                         */}
