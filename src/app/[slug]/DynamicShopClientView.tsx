@@ -73,7 +73,7 @@ export default function DynamicShopClientView({
   if (!isClient || isLoading) {
     return (
       <div
-        className="min-h-screen w-full bg-[#FAF7F2] flex flex-col items-center justify-center p-4"
+        className="min-h-dvh min-h-[100dvh] w-full bg-[#FAF7F2] flex flex-col items-center justify-center p-4"
         suppressHydrationWarning
       >
         <div className="w-10 h-10 rounded-full border-3 border-[#5C3A21] border-t-transparent animate-spin mb-3" />
@@ -84,7 +84,7 @@ export default function DynamicShopClientView({
 
   return (
     <div
-      className="min-h-screen w-full bg-[#FAF7F2] text-stone-900 flex flex-col items-center justify-center p-6 text-center"
+      className="min-h-dvh min-h-[100dvh] w-full bg-[#FAF7F2] text-stone-900 flex flex-col items-center justify-center p-6 text-center"
       suppressHydrationWarning
     >
       <div className="w-16 h-16 rounded-2xl bg-[#F3ECE4] border border-[#E5DACD] flex items-center justify-center mb-4 shadow-sm">

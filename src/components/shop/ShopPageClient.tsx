@@ -79,10 +79,15 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
   const buttonLink = shop.buttonUrl || (shop.address ? `https://maps.google.com/?q=${encodeURIComponent(shop.name + ' ' + shop.address)}` : 'https://maps.google.com');
   const mainButtonBg = shop.themeColor || '#5C3A21';
 
+  const googleReviewLink = shop.links.find((l) => l.type === 'google_review') || (shop.links[0]?.type === 'google_review' ? shop.links[0] : null);
+  const otherLinks = googleReviewLink
+    ? shop.links.filter((l) => l.id !== googleReviewLink.id)
+    : shop.links;
+
   if (!mounted) {
     return (
       <div
-        className="min-h-screen w-full bg-[#FAF7F2] flex items-center justify-center"
+        className="min-h-dvh min-h-[100dvh] w-full bg-[#FAF7F2] flex items-center justify-center"
         suppressHydrationWarning
       >
         <div className="w-8 h-8 rounded-full border-2 border-[#5C3A21] border-t-transparent animate-spin" />
@@ -92,7 +97,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
 
   return (
     <div
-      className="min-h-screen w-full bg-[#FAF7F2] sm:bg-[#F0EAE1] text-stone-900 flex flex-col items-center justify-start sm:justify-center relative overflow-x-hidden selection:bg-amber-200 selection:text-amber-950 font-sans p-0 sm:py-8 sm:px-4"
+      className="min-h-dvh min-h-[100dvh] w-full bg-[#FAF7F2] sm:bg-[#F0EAE1] text-stone-900 flex flex-col items-center justify-start sm:justify-center relative overflow-x-hidden selection:bg-amber-200 selection:text-amber-950 font-sans p-0 sm:py-8 sm:px-4"
       suppressHydrationWarning
     >
       {/* Desktop Ambient Luxury Atmosphere */}
@@ -101,7 +106,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
       </div>
 
       {/* Main Centered Responsive Card Shell */}
-      <div className="w-full max-w-md sm:max-w-xl md:max-w-2xl lg:max-w-3xl min-h-screen sm:min-h-[740px] bg-[#FAF7F2] relative z-10 flex flex-col items-center sm:my-6 sm:rounded-[44px] sm:shadow-2xl sm:shadow-stone-900/12 sm:border sm:border-[#EDE8E1] overflow-hidden">
+      <div className="w-full max-w-md sm:max-w-xl md:max-w-2xl lg:max-w-3xl min-h-dvh min-h-[100dvh] sm:min-h-[740px] bg-[#FAF7F2] relative z-10 flex flex-col items-center sm:my-6 sm:rounded-[44px] sm:shadow-2xl sm:shadow-stone-900/12 sm:border sm:border-[#EDE8E1] overflow-hidden">
         
         {/* ============================================================== */}
         {/* 1. HEADER SECTION: COVER BANNER OR CLEAN MINIMALIST AVATAR     */}
@@ -230,34 +235,35 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
         </div>
 
         {/* ============================================================== */}
-        {/* 4. SOCIAL & REVIEW BUTTONS (RESPONSIVE GRID & HERO ACTION)      */}
+        {/* 4. SOCIAL & REVIEW BUTTONS (PRIMARY GOOGLE REVIEW + CHANNELS)   */}
         {/* ============================================================== */}
-        <div className="w-full px-5 sm:px-8 md:px-10 mt-6 sm:mt-8 z-10">
-          {/* CASE 1: ONLY 1 LINK CONFIGURED (HERO ACTION REVIEW CARD) */}
-          {shop.links.length === 1 && (
+        <div className="w-full px-5 sm:px-8 md:px-10 mt-6 sm:mt-7 z-10 flex flex-col items-center">
+          {/* PRIMARY GOOGLE REVIEW HERO CARD */}
+          {googleReviewLink && (
             <div className="max-w-xl mx-auto w-full">
               <a
-                href={shop.links[0].url}
-                onClick={(e) => handleLinkClick(e, shop.links[0])}
+                href={googleReviewLink.url}
+                onClick={(e) => handleLinkClick(e, googleReviewLink)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group w-full bg-white hover:bg-[#FDFCFB] border border-[#EDE8E1] hover:border-[#5C3A21]/50 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.99]"
+                className="group w-full bg-white hover:bg-[#FDFCFB] border-2 border-amber-200/90 hover:border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
               >
                 <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
                   <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-xs">
-                    <LocalBrandIcon type={shop.links[0].type} className="w-8 h-8 sm:w-10 sm:h-10" />
+                    <LocalBrandIcon type={googleReviewLink.type} className="w-8 h-8 sm:w-10 sm:h-10" />
                   </div>
                   <div className="text-left min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-extrabold text-sm sm:text-base md:text-lg text-stone-900 group-hover:text-[#5C3A21] transition-colors truncate">
-                        {shop.links[0].title}
+                        {googleReviewLink.title}
                       </span>
-                      <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] sm:text-xs font-bold border border-emerald-200/60">
-                        ★ 5.0 Rating
+                      <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-950 text-[10px] sm:text-xs font-black border border-amber-300/80 inline-flex items-center gap-1 shadow-2xs">
+                        <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                        <span>5.0 Rating</span>
                       </span>
                     </div>
                     <p className="text-xs sm:text-sm text-stone-500 mt-0.5 font-medium truncate">
-                      {shop.links[0].subtitle || 'Tap to leave a 5-star review'}
+                      {googleReviewLink.subtitle || 'Tap to leave a 5-star review'}
                     </p>
                   </div>
                 </div>
@@ -270,33 +276,31 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
             </div>
           )}
 
-          {/* CASE 2: 2 TO 5 LINKS (SMART BALANCED GRID ACROSS MOBILE & DESKTOP) */}
-          {shop.links.length > 1 && (
-            <div className="max-w-2xl mx-auto w-full">
+          {/* ADDITIONAL SOCIAL / CONTACT LINKS (IF CONFIGURED) */}
+          {otherLinks.length > 0 && (
+            <div className="max-w-xl mx-auto w-full mt-3 sm:mt-3.5">
               <div
-                className={`grid gap-3.5 sm:gap-4 ${
-                  shop.links.length === 2
-                    ? 'grid-cols-2 max-w-md sm:max-w-lg mx-auto'
-                    : shop.links.length === 3
+                className={`grid gap-2.5 sm:gap-3 ${
+                  otherLinks.length === 1
+                    ? 'grid-cols-1'
+                    : otherLinks.length === 2
+                    ? 'grid-cols-2'
+                    : otherLinks.length === 3
                     ? 'grid-cols-3'
-                    : shop.links.length === 4
-                    ? 'grid-cols-2 sm:grid-cols-4'
-                    : 'grid-cols-3 sm:grid-cols-5'
+                    : 'grid-cols-2 sm:grid-cols-4'
                 }`}
               >
-                {shop.links.map((link: ShopLink) => (
+                {otherLinks.map((link: ShopLink) => (
                   <a
                     key={link.id}
                     href={link.url}
                     onClick={(e) => handleLinkClick(e, link)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group bg-white hover:bg-[#FDFCFB] border border-[#EDE8E1] rounded-3xl p-3.5 sm:p-5 flex flex-col items-center justify-center aspect-square shadow-xs hover:shadow-md hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-200"
+                    className="group bg-white hover:bg-[#FDFCFB] border border-[#EDE8E1] hover:border-stone-300 rounded-2xl p-3 sm:p-3.5 flex items-center justify-center gap-2.5 shadow-2xs hover:shadow-xs transition-all duration-200 active:scale-95"
                   >
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center mb-2 sm:mb-2.5 group-hover:scale-110 transition-transform">
-                      <LocalBrandIcon type={link.type} className="w-8 h-8 sm:w-9 sm:h-9" />
-                    </div>
-                    <span className="text-[11px] sm:text-xs font-bold text-stone-900 text-center leading-tight truncate w-full">
+                    <LocalBrandIcon type={link.type} className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs sm:text-sm font-bold text-stone-800 truncate">
                       {link.title}
                     </span>
                   </a>
@@ -309,7 +313,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
         {/* ============================================================== */}
         {/* 5. VISIT OUR SHOP PILL BUTTON (CUSTOMIZED FROM DB)             */}
         {/* ============================================================== */}
-        <div className="w-full px-5 sm:px-8 md:px-10 mt-6 sm:mt-7 z-10 flex justify-center">
+        <div className="w-full px-5 sm:px-8 md:px-10 mt-5 sm:mt-6 z-10 flex justify-center">
           <a
             href={buttonLink}
             onClick={() => trackShopAction(shop.slug, 'main_button')}
@@ -324,77 +328,64 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
         </div>
 
         {/* ============================================================== */}
-        {/* 6. REFERRAL: ATTACHED "OUR OTHER SERVICES" & DEVELOPER CREDITS   */}
+        {/* 6. REFERRAL: SUBTLE DEVELOPER FOOTER ATTRIBUTION                */}
         {/* ============================================================== */}
         {shop.showReferral !== false && (
-          <div className="w-full px-5 sm:px-8 md:px-10 mt-auto pt-8 pb-7 sm:pb-8 z-10 flex flex-col items-center">
-            <div className="w-full max-w-xl rounded-2xl bg-white border border-[#EDE8E1] shadow-xs overflow-hidden transition group hover:border-stone-300">
-              {/* Top: Our Other Services Clickable Link */}
-              <Link
-                href="/services"
+          <footer className="w-full px-5 sm:px-8 md:px-10 mt-auto pt-8 pb-8 sm:pb-9 z-10 flex flex-col items-center text-center">
+            {/* Subtle, understated link to Digital Solutions */}
+            <Link
+              href="/services"
+              onClick={() => trackShopAction(shop.slug, 'referral')}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-200/50 hover:bg-stone-200/80 text-stone-500 hover:text-stone-800 text-[11px] font-semibold transition active:scale-95 mb-2"
+            >
+              <span>Digital Solutions &amp; Smart NFC Cards</span>
+              <ChevronRight className="w-3 h-3 text-stone-400" />
+            </Link>
+
+            {/* Quiet, classy developer attribution */}
+            <div className="text-[11px] text-stone-400 font-medium flex items-center justify-center gap-2 flex-wrap">
+              <span>
+                Crafted by{' '}
+                <a
+                  href="https://piyushassudani.in"
+                  onClick={() => trackShopAction(shop.slug, 'referral')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-stone-600 hover:text-stone-800 hover:underline"
+                >
+                  Piyush Assudani
+                </a>
+              </span>
+              <span className="text-stone-300">•</span>
+              <a
+                href="tel:+919413879444"
                 onClick={() => trackShopAction(shop.slug, 'referral')}
-                className="w-full py-3 sm:py-3.5 px-4 sm:px-5 bg-white hover:bg-stone-50/90 flex items-center justify-between transition group-hover:bg-[#FAF7F2]/60"
+                className="text-stone-500 hover:text-stone-700 hover:underline"
               >
-                <div className="flex items-center gap-2 sm:gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="font-bold text-xs sm:text-sm text-stone-900">
-                    Our Other Services &amp; Digital Solutions
-                  </span>
-                </div>
-                <div className="flex items-center gap-1 text-[#5C3A21] font-bold text-xs sm:text-sm">
-                  <span>View</span>
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </Link>
-
-              {/* Bottom: Attached Developer Credits & Phone */}
-              <div className="px-4 py-2.5 sm:py-3 bg-[#FAF7F2] border-t border-[#EDE8E1] text-center flex flex-col items-center gap-1">
-                <div className="text-[11px] sm:text-xs text-stone-600 font-medium">
-                  Designed &amp; Developed by{' '}
-                  <a
-                    href="https://piyushassudani.in"
-                    onClick={() => trackShopAction(shop.slug, 'referral')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold text-[#5C3A21] hover:underline"
-                  >
-                    Piyush Assudani
-                  </a>{' '}
-                  <span className="text-stone-400">(Assudani Developer)</span>
-                </div>
-
-                <div className="flex items-center justify-center gap-2.5 sm:gap-3 text-[11px] sm:text-xs text-stone-500 font-medium flex-wrap">
-                  <a
-                    href="tel:+919413879444"
-                    onClick={() => trackShopAction(shop.slug, 'referral')}
-                    className="inline-flex items-center gap-1 text-[#5C3A21] hover:underline font-semibold"
-                  >
-                    <span>📞 +91 9413879444</span>
-                  </a>
-                  <span className="text-stone-300">•</span>
-                  <a
-                    href="https://wa.me/919413879444?text=Hello%20Piyush%2C%20I%20saw%20your%20NFC%20project%20and%20want%20to%20connect."
-                    onClick={() => trackShopAction(shop.slug, 'referral')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-emerald-700 hover:underline font-semibold"
-                  >
-                    WhatsApp
-                  </a>
-                  <span className="text-stone-300">•</span>
-                  <a
-                    href="https://piyushassudani.in"
-                    onClick={() => trackShopAction(shop.slug, 'referral')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-stone-600 hover:text-stone-900 hover:underline font-medium"
-                  >
-                    piyushassudani.in
-                  </a>
-                </div>
-              </div>
+                +91 9413879444
+              </a>
+              <span className="text-stone-300">•</span>
+              <a
+                href="https://wa.me/919413879444?text=Hello%20Piyush%2C%20I%20saw%20your%20NFC%20project%20and%20want%20to%20connect."
+                onClick={() => trackShopAction(shop.slug, 'referral')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-stone-500 hover:text-emerald-700 font-medium hover:underline"
+              >
+                WhatsApp
+              </a>
+              <span className="text-stone-300">•</span>
+              <a
+                href="https://piyushassudani.in"
+                onClick={() => trackShopAction(shop.slug, 'referral')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-stone-500 hover:text-stone-800 hover:underline"
+              >
+                Portfolio
+              </a>
             </div>
-          </div>
+          </footer>
         )}
       </div>
     </div>
