@@ -12,11 +12,17 @@ import {
   ChevronRight,
   Star,
   ShieldCheck,
+  UserPlus,
+  Share2,
+  Check,
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { trackShopAction, getLocalShops } from '@/lib/db';
 import { useIsClient } from '@/lib/useIsClient';
 import ShopLoader from '@/components/shop/ShopLoader';
 import GoogleReviewPromptModal from '@/components/shop/GoogleReviewPromptModal';
+import ShareProfileModal from '@/components/shop/ShareProfileModal';
+import { downloadShopVCard } from '@/lib/vcard';
 import Link from 'next/link';
 
 interface ShopPageClientProps {
@@ -28,6 +34,24 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
   const mounted = useIsClient();
   const [isReady, setIsReady] = useState<boolean>(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState<boolean>(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
+  const [isContactSaved, setIsContactSaved] = useState<boolean>(false);
+
+  // Download native vCard (.vcf)
+  const handleSaveContact = () => {
+    downloadShopVCard(shop);
+    setIsContactSaved(true);
+    trackShopAction(shop.slug, 'save_contact');
+    try {
+      confetti({
+        particleCount: 50,
+        spread: 50,
+        origin: { y: 0.5 },
+        colors: ['#25D366', '#5C3A21', '#D4AF37'],
+      });
+    } catch {}
+    setTimeout(() => setIsContactSaved(false), 2500);
+  };
 
   // Smooth splash timing so the branded logo loader appears before opening
   useEffect(() => {
@@ -157,6 +181,17 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
               {/* Subtle warm gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/35 pointer-events-none" />
 
+              {/* Top-Right Floating Share Button on Banner */}
+              <button
+                type="button"
+                onClick={() => setIsShareModalOpen(true)}
+                className="absolute top-3.5 right-3.5 z-20 p-2.5 rounded-full bg-black/45 hover:bg-black/60 text-white backdrop-blur-md border border-white/20 shadow-md transition active:scale-95 cursor-pointer"
+                aria-label="Share card"
+                title="Share & QR"
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+
               {/* Organic Curved Wave Mask at Bottom (Upward Dome Crest) */}
               <CurvedWaveMask />
             </div>
@@ -187,6 +222,17 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
               className="absolute -top-10 left-1/2 -translate-x-1/2 w-80 h-40 rounded-full blur-3xl opacity-20 pointer-events-none"
               style={{ backgroundColor: shop.themeColor || '#5C3A21' }}
             />
+
+            {/* Top-Right Share Button */}
+            <button
+              type="button"
+              onClick={() => setIsShareModalOpen(true)}
+              className="absolute top-3.5 right-3.5 z-20 p-2.5 rounded-full bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/80 shadow-2xs transition active:scale-95 cursor-pointer"
+              aria-label="Share card"
+              title="Share card & QR"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
 
             {/* Top Verified NFC Pill Badge */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#EDE8E1] text-[10px] sm:text-xs font-bold text-stone-600 shadow-2xs mb-3">
@@ -251,6 +297,40 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
               {shop.tagline}
             </p>
           )}
+
+          {/* Quick Utility Action Bar: Save Contact & Share Profile */}
+          <div className="mt-3.5 flex items-center justify-center gap-2.5 px-4 w-full max-w-xs mx-auto">
+            <button
+              type="button"
+              onClick={handleSaveContact}
+              className={`flex-1 py-2 px-3.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition-all duration-200 active:scale-95 cursor-pointer ${
+                isContactSaved
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'bg-white hover:bg-stone-50 border-[#EDE8E1] hover:border-stone-300 text-stone-800'
+              }`}
+            >
+              {isContactSaved ? (
+                <>
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>Saved!</span>
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-3.5 h-3.5 text-[#5C3A21]" />
+                  <span>Save Contact</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsShareModalOpen(true)}
+              className="flex-1 py-2 px-3.5 rounded-2xl bg-white hover:bg-stone-50 border border-[#EDE8E1] hover:border-stone-300 text-stone-800 text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs transition-all duration-200 active:scale-95 cursor-pointer"
+            >
+              <Share2 className="w-3.5 h-3.5 text-[#5C3A21]" />
+              <span>Share &amp; QR</span>
+            </button>
+          </div>
         </div>
 
         {/* ============================================================== */}
@@ -437,6 +517,13 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
           shopName={shop.name}
         />
       )}
+
+      {/* 7. SHARE PROFILE & QR CODE MODAL */}
+      <ShareProfileModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        shop={shop}
+      />
     </div>
   );
 }
