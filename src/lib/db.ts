@@ -65,8 +65,25 @@ export async function getShops(): Promise<Shop[]> {
       snap.forEach((docItem) => {
         fetched.push(docItem.data() as Shop);
       });
-      saveLocalShops(fetched);
-      return fetched;
+
+      if (fetched.length > 0) {
+        saveLocalShops(fetched);
+        return fetched;
+      } else {
+        // If Firestore has 0 shops, check if client has local shops to sync to cloud!
+        const local = getLocalShops();
+        if (local.length > 0) {
+          for (const s of local) {
+            try {
+              await setDoc(doc(db, 'shops', s.id), s, { merge: true });
+            } catch {
+              // ignore
+            }
+          }
+          return local;
+        }
+        return [];
+      }
     } catch (err) {
       console.warn("Firestore getShops using local storage cache:", (err as Error)?.message);
     }
