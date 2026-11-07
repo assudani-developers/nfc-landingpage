@@ -236,12 +236,22 @@ export default function ShopEditModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError('Shop Name is required.');
+      setError('Please enter your Shop Name at the top.');
+      const nameEl = document.getElementById('biz_shop_name');
+      if (nameEl) {
+        nameEl.focus();
+        nameEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
-    if (!slug.trim()) {
-      setError('Shop URL Slug is required.');
-      return;
+
+    let finalSlug = slug.trim();
+    if (!finalSlug) {
+      finalSlug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, '-')
+        .replace(/^-+|-+$/g, '') || 'shop';
+      setSlug(finalSlug);
     }
 
     setIsSubmitting(true);
@@ -297,7 +307,7 @@ export default function ShopEditModal({
       const shopToSave: Shop = {
         id: initialShop?.id || `shop-${Date.now()}`,
         name: name.trim(),
-        slug: slug.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/^-+|-+$/g, ''),
+        slug: finalSlug.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/^-+|-+$/g, ''),
         tagline: tagline.trim() || 'Welcome to our store',
         category: category.trim() || 'Store',
         address: address.trim(),
@@ -331,61 +341,65 @@ export default function ShopEditModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white border border-[#EDE8E1] rounded-[32px] max-w-4xl w-full p-6 sm:p-9 relative shadow-2xl my-6 sm:my-10">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-stone-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/60 backdrop-blur-sm">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white border border-[#EDE8E1] rounded-[28px] sm:rounded-[32px] max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl relative overflow-hidden animate-in fade-in duration-150"
+        autoComplete="off"
+        noValidate
+        data-lpignore="true"
+      >
+        {/* Pinned Sticky Header */}
+        <div className="flex items-center justify-between px-6 py-4 sm:px-8 sm:py-5 border-b border-stone-200 bg-white z-20 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#5C3A21] flex items-center justify-center shadow-md shadow-[#5C3A21]/20">
+            <div className="w-10 h-10 rounded-2xl bg-[#5C3A21] flex items-center justify-center shadow-md shadow-[#5C3A21]/20 flex-shrink-0">
               <NfcWaveIcon className="w-5 h-5 text-amber-200" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-stone-900">
+              <h2 className="text-lg sm:text-xl font-bold text-stone-900">
                 {isEditing ? `Edit Shop: ${initialShop?.name}` : 'Add New NFC Shop Card'}
               </h2>
-              <p className="text-xs text-stone-500">
-                Everything is customized from database: Banner, logo, buttons, colors &amp; links.
+              <p className="text-[11px] sm:text-xs text-stone-500">
+                Configure storefront banner, logo, business details &amp; smart review links.
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 rounded-full bg-stone-100 text-stone-500 hover:text-stone-900 hover:bg-stone-200 transition"
+            className="p-2 rounded-full bg-stone-100 text-stone-500 hover:text-stone-900 hover:bg-stone-200 transition active:scale-95"
+            title="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {error && (
-          <div className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Form Body with Anti-Autofill Protection */}
-        <form
-          onSubmit={handleSubmit}
-          className="mt-6 space-y-5"
-          autoComplete="off"
-          noValidate
-          data-lpignore="true"
-        >
+        {/* Scrollable Form Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 sm:px-8 sm:py-6 space-y-6">
           {/* Honeypot fields to absorb browser password managers */}
           <div style={{ display: 'none' }} aria-hidden="true">
             <input type="text" name="chrome_prevent_autofill_username" tabIndex={-1} autoComplete="off" />
             <input type="password" name="chrome_prevent_autofill_password" tabIndex={-1} autoComplete="new-password" />
           </div>
 
+          {/* Top Error Alert if any */}
+          {error && (
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
+              <span className="font-semibold">{error}</span>
+            </div>
+          )}
+
           {/* Section 1: Basic Info & Custom URL */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1.5">
-                Shop Name *
+              <label className="block text-xs font-semibold text-stone-700 mb-1.5 flex items-center justify-between">
+                <span>Shop Name *</span>
+                <span className="text-[10px] text-stone-400 font-normal">Business or Brand Name</span>
               </label>
               <input
+                id="biz_shop_name"
                 type="text"
-                required
                 name="biz_shop_name"
                 autoComplete="off"
                 data-lpignore="true"
@@ -393,14 +407,19 @@ export default function ShopEditModal({
                 data-form-type="other"
                 value={name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="e.g. The Urban Café"
-                className="w-full bg-[#FAF7F2] border border-stone-200 rounded-xl px-3.5 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#5C3A21] focus:bg-white transition"
+                placeholder="e.g. The Urban Café or Assudani Stores"
+                className={`w-full bg-[#FAF7F2] border rounded-xl px-3.5 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition ${
+                  error && !name.trim()
+                    ? 'border-rose-500 ring-2 ring-rose-200 bg-rose-50/30'
+                    : 'border-stone-200 focus:border-[#5C3A21] focus:bg-white'
+                }`}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1.5">
-                Custom URL Slug * (Unique NFC Link)
+              <label className="block text-xs font-semibold text-stone-700 mb-1.5 flex items-center justify-between">
+                <span>Custom URL Slug *</span>
+                <span className="text-[10px] text-stone-400 font-normal">Unique NFC Link</span>
               </label>
               <div className="flex items-center bg-[#FAF7F2] border border-stone-200 rounded-xl overflow-hidden focus-within:border-[#5C3A21] focus-within:bg-white transition">
                 <span className="px-3 text-xs text-stone-500 bg-stone-100 border-r border-stone-200 py-2.5 font-medium">
@@ -408,7 +427,6 @@ export default function ShopEditModal({
                 </span>
                 <input
                   type="text"
-                  required
                   name="biz_shop_slug"
                   autoComplete="off"
                   data-lpignore="true"
@@ -929,35 +947,40 @@ export default function ShopEditModal({
               />
             </button>
           </div>
+        </div>
 
-          {/* Bottom Error Feedback if any */}
-          {error && (
-            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+        {/* Pinned Sticky Footer (Always in view, never cut off) */}
+        <div className="px-6 py-4 sm:px-8 sm:py-4 border-t border-stone-200 bg-[#FAF7F2] flex flex-col sm:flex-row items-center justify-between gap-3 z-20 flex-shrink-0">
+          {error ? (
+            <div className="text-rose-700 text-xs font-semibold flex items-center gap-1.5 w-full sm:w-auto">
               <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
-              <span className="font-semibold">{error}</span>
+              <span>{error}</span>
             </div>
+          ) : (
+            <span className="text-[11px] text-stone-500 hidden sm:inline">
+              Settings sync live to your NFC smart card &amp; review standee
+            </span>
           )}
 
-          {/* Form Actions */}
-          <div className="pt-4 border-t border-stone-200 flex items-center justify-end gap-3">
+          <div className="flex items-center gap-2.5 ml-auto w-full sm:w-auto justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition"
+              className="py-2.5 px-4 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 font-semibold text-xs transition active:scale-95"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="py-2.5 px-5 rounded-xl bg-[#5C3A21] hover:bg-[#472c19] text-white font-bold text-xs flex items-center gap-2 transition shadow-md shadow-[#5C3A21]/20 disabled:opacity-50"
+              className="py-2.5 px-5 rounded-xl bg-[#5C3A21] hover:bg-[#472c19] text-white font-bold text-xs flex items-center gap-2 transition shadow-md shadow-[#5C3A21]/20 disabled:opacity-50 active:scale-95"
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-4 h-4 text-amber-200" />
               <span>{isSubmitting ? 'Saving...' : isEditing ? 'Update Shop Card' : 'Create Shop Card'}</span>
             </button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 }
