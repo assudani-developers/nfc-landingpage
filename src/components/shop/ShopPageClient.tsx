@@ -13,10 +13,10 @@ import {
   Star,
   ShieldCheck,
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { trackShopAction, getLocalShops } from '@/lib/db';
 import { useIsClient } from '@/lib/useIsClient';
 import ShopLoader from '@/components/shop/ShopLoader';
+import GoogleReviewPromptModal from '@/components/shop/GoogleReviewPromptModal';
 import Link from 'next/link';
 
 interface ShopPageClientProps {
@@ -27,6 +27,7 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
   const [shop, setShop] = useState<Shop>(initialShop);
   const mounted = useIsClient();
   const [isReady, setIsReady] = useState<boolean>(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState<boolean>(false);
 
   // Smooth splash timing so the branded logo loader appears before opening
   useEffect(() => {
@@ -64,25 +65,15 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
     };
   }, [initialShop.slug, initialShop.id, shop.slug]);
 
-  // Handle any link click with tracking (and confetti for Google Review)
+  // Handle any link click with tracking
   const handleLinkClick = (e: React.MouseEvent, link: ShopLink) => {
     trackShopAction(shop.slug, link.type);
 
+    // When Google Review is clicked, open the 10 Pre-written Prompts modal
     if (link.type === 'google_review') {
       e.preventDefault();
-      try {
-        confetti({
-          particleCount: 65,
-          spread: 60,
-          origin: { y: 0.65 },
-          colors: ['#EA4335', '#4285F4', '#FBBC05', '#34A853', '#5C3A21'],
-        });
-      } catch {
-        // ignore
-      }
-      setTimeout(() => {
-        window.open(link.url, '_blank', 'noopener,noreferrer');
-      }, 320);
+      setIsReviewModalOpen(true);
+      return;
     }
   };
 
@@ -447,6 +438,16 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
           </footer>
         )}
       </div>
+
+      {/* 6. GOOGLE REVIEW PROMPTS BOTTOM SHEET MODAL (10 PRE-WRITTEN REVIEWS) */}
+      {googleReviewLink && (
+        <GoogleReviewPromptModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          reviewUrl={googleReviewLink.url}
+          shopName={shop.name}
+        />
+      )}
     </div>
   );
 }
