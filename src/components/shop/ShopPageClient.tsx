@@ -16,6 +16,7 @@ import {
 import confetti from 'canvas-confetti';
 import { trackShopAction, getLocalShops } from '@/lib/db';
 import { useIsClient } from '@/lib/useIsClient';
+import ShopLoader from '@/components/shop/ShopLoader';
 import Link from 'next/link';
 
 interface ShopPageClientProps {
@@ -25,6 +26,16 @@ interface ShopPageClientProps {
 export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
   const [shop, setShop] = useState<Shop>(initialShop);
   const mounted = useIsClient();
+  const [isReady, setIsReady] = useState<boolean>(false);
+
+  // Smooth splash timing so the branded logo loader appears before opening
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 450);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Sync with local DB if changes occur in admin
   useEffect(() => {
@@ -95,20 +106,19 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
     ? shop.links.filter((l) => l.id !== googleReviewLink.id)
     : shop.links;
 
-  if (!mounted) {
+  if (!mounted || !isReady) {
     return (
-      <div
-        className="min-h-dvh min-h-[100dvh] w-full bg-[#FAF7F2] flex items-center justify-center"
-        suppressHydrationWarning
-      >
-        <div className="w-8 h-8 rounded-full border-2 border-[#5C3A21] border-t-transparent animate-spin" />
-      </div>
+      <ShopLoader
+        logoUrl={shop.logoUrl}
+        name={shop.name}
+        themeColor={shop.themeColor}
+      />
     );
   }
 
   return (
     <div
-      className="min-h-dvh min-h-[100dvh] w-full bg-[#FAF7F2] sm:bg-[#F0EAE1] text-stone-900 flex flex-col items-center justify-start sm:justify-center relative overflow-x-hidden selection:bg-amber-200 selection:text-amber-950 font-sans p-0 sm:py-8 sm:px-4"
+      className="min-h-dvh min-h-[100dvh] w-full bg-[#FAF7F2] sm:bg-[#F0EAE1] text-stone-900 flex flex-col items-center justify-start sm:justify-center relative overflow-x-hidden selection:bg-amber-200 selection:text-amber-950 font-sans p-0 sm:py-8 sm:px-4 animate-in fade-in duration-300"
       suppressHydrationWarning
     >
       {/* Desktop Ambient Luxury Atmosphere */}

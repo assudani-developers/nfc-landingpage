@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Shop } from '@/types';
 import { getLocalShops, getShopBySlug, saveShop } from '@/lib/db';
 import ShopPageClient from '@/components/shop/ShopPageClient';
+import ShopLoader from '@/components/shop/ShopLoader';
 import { useIsClient } from '@/lib/useIsClient';
 import Link from 'next/link';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
@@ -72,13 +73,9 @@ export default function DynamicShopClientView({
 
   if (!isClient || isLoading) {
     return (
-      <div
-        className="min-h-dvh min-h-[100dvh] w-full bg-[#FAF7F2] flex flex-col items-center justify-center p-4"
-        suppressHydrationWarning
-      >
-        <div className="w-10 h-10 rounded-full border-3 border-[#5C3A21] border-t-transparent animate-spin mb-3" />
-        <p className="text-xs font-semibold text-stone-600">Loading shop profile...</p>
-      </div>
+      <ShopLoader
+        name={slug}
+      />
     );
   }
 
