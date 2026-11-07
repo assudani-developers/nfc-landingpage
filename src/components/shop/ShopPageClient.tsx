@@ -228,12 +228,17 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
             {shop.name}
           </h1>
 
-          <div className="mt-2 flex items-center justify-center gap-2 flex-wrap">
-            {shop.category && (
-              <span className="text-xs font-bold text-[#8C6239] tracking-wide px-3 py-1 rounded-full bg-[#F3ECE4] border border-[#E5DACD] max-w-[170px] sm:max-w-[220px] truncate">
+          {/* Line 1: Full Category Badge (Without Truncation) */}
+          {shop.category && (
+            <div className="mt-2 flex justify-center">
+              <span className="text-xs font-bold text-[#8C6239] tracking-wide px-3.5 py-1 rounded-full bg-[#F3ECE4] border border-[#E5DACD] max-w-full break-words text-center leading-relaxed">
                 {shop.category}
               </span>
-            )}
+            </div>
+          )}
+
+          {/* Line 2: 5-Star Rating Badge (Next Line) */}
+          <div className="mt-2 flex justify-center">
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/90 text-amber-950 text-xs font-bold shadow-2xs">
               <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
               <span>{shop.rating || 4.9}</span>
@@ -241,24 +246,8 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
             </span>
           </div>
 
-          {/* Clickable Address that opens Google Maps directly */}
-          {shop.address && (
-            <a
-              href={`https://maps.google.com/?q=${encodeURIComponent(shop.name + ' ' + shop.address)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center justify-center gap-1.5 text-xs text-stone-500 hover:text-stone-900 font-medium px-2 group transition"
-              title="Open location in Google Maps"
-            >
-              <MapPin className="w-3.5 h-3.5 text-[#5C3A21] flex-shrink-0 group-hover:scale-110 transition-transform" />
-              <span className="truncate max-w-[250px] sm:max-w-md group-hover:underline">
-                {shop.address}
-              </span>
-            </a>
-          )}
-
           {shop.tagline && (
-            <p className="mt-2 text-xs sm:text-sm text-stone-600 max-w-lg mx-auto leading-relaxed break-words px-3">
+            <p className="mt-2.5 text-xs sm:text-sm text-stone-600 max-w-lg mx-auto leading-relaxed break-words px-3">
               {shop.tagline}
             </p>
           )}
