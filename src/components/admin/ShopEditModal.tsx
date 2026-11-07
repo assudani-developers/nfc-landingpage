@@ -121,6 +121,7 @@ export default function ShopEditModal({
   const [themeColor, setThemeColor] = useState(initialShop?.themeColor || '#5C3A21');
   const [showReferral, setShowReferral] = useState(initialShop?.showReferral !== false);
   const [coverUrl, setCoverUrl] = useState(initialShop?.coverUrl || '');
+  const [coverFit, setCoverFit] = useState<'cover' | 'contain'>(initialShop?.coverFit || 'cover');
   const [logoUrl, setLogoUrl] = useState(initialShop?.logoUrl || '');
   const [theme, setTheme] = useState<ShopTheme>(initialShop?.theme || 'warm_cafe');
 
@@ -314,6 +315,7 @@ export default function ShopEditModal({
         buttonUrl: buttonUrl.trim() || `https://maps.google.com/?q=${encodeURIComponent(name)}`,
         themeColor: themeColor || '#5C3A21',
         coverUrl: coverUrl.trim() || PRESET_COVERS[0].url,
+        coverFit,
         logoUrl: logoUrl.trim() || PRESET_LOGOS[0].url,
         theme,
         rating: initialShop?.rating || 4.9,
@@ -648,6 +650,39 @@ export default function ShopEditModal({
                     </span>
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Banner Fit Style Selector */}
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-stone-100/70 border border-stone-200 text-xs">
+              <div>
+                <span className="font-bold text-stone-900 block">Banner Display Style</span>
+                <span className="text-[10px] text-stone-500">Choose how the banner image fits on screen</span>
+              </div>
+              <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-stone-200">
+                <button
+                  type="button"
+                  onClick={() => setCoverFit('cover')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition ${
+                    coverFit === 'cover'
+                      ? 'bg-[#5C3A21] text-white shadow-xs'
+                      : 'text-stone-600 hover:text-stone-900'
+                  }`}
+                >
+                  🖼️ Fill (Cover)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCoverFit('contain')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition ${
+                    coverFit === 'contain'
+                      ? 'bg-[#5C3A21] text-white shadow-xs'
+                      : 'text-stone-600 hover:text-stone-900'
+                  }`}
+                  title="Shows entire banner without cutting any text"
+                >
+                  📏 Fit (Full Banner)
+                </button>
               </div>
             </div>
           </div>

@@ -30,6 +30,7 @@ export interface Shop {
   tagline: string; // e.g. "Your neighbourhood café for great coffee, fresh bites and good vibes."
   address?: string;
   coverUrl: string; // storefront photo
+  coverFit?: 'cover' | 'contain'; // banner fit style (crop to cover or full banner)
   logoUrl: string; // shop logo
   buttonText: string; // e.g. "Visit Our Shop"
   buttonUrl: string; // Google Maps or website or phone URL
