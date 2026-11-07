@@ -246,70 +246,75 @@ export default function ShopPageClient({ initialShop }: ShopPageClientProps) {
         </div>
 
         {/* ============================================================== */}
-        {/* 6. REFERRAL: "OUR OTHER SERVICES" & DEVELOPER CREDITS          */}
+        {/* 6. REFERRAL: ATTACHED "OUR OTHER SERVICES" & DEVELOPER CREDITS   */}
         {/* ============================================================== */}
         {shop.showReferral !== false && (
-          <div className="w-full px-6 mt-6 z-10 flex flex-col items-center text-center">
-            {/* Our Other Services Referral Link */}
-            <Link
-              href="/services"
-              onClick={() => trackShopAction(shop.slug, 'referral')}
-              className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-stone-50 border border-[#EDE8E1] text-xs font-semibold text-stone-800 shadow-sm flex items-center justify-between transition group mb-3 hover:border-stone-300 active:scale-[0.99]"
-            >
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-bold text-stone-900">Our Other Services &amp; Digital Solutions</span>
-              </div>
-              <div className="flex items-center gap-1 text-[#5C3A21] font-bold">
-                <span>View</span>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </div>
-            </Link>
+          <div className="w-full px-5 sm:px-6 mt-6 z-10 flex flex-col items-center">
+            <div className="w-full rounded-2xl bg-white border border-[#EDE8E1] shadow-xs overflow-hidden transition group hover:border-stone-300">
+              {/* Top: Our Other Services Clickable Link */}
+              <Link
+                href="/services"
+                onClick={() => trackShopAction(shop.slug, 'referral')}
+                className="w-full py-3 px-4 bg-white hover:bg-stone-50/90 flex items-center justify-between transition group-hover:bg-[#FAF7F2]/60"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="font-bold text-xs text-stone-900">
+                    Our Other Services &amp; Digital Solutions
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-[#5C3A21] font-bold text-xs">
+                  <span>View</span>
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </Link>
 
-            {/* Attached Developer Credits */}
-            <div className="text-[11px] text-stone-600 font-medium">
-              Designed &amp; Developed by{' '}
-              <a
-                href="https://piyushassudani.in"
-                onClick={() => trackShopAction(shop.slug, 'referral')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-bold text-[#5C3A21] hover:underline"
-              >
-                Piyush Assudani
-              </a>{' '}
-              <span className="text-stone-400">(Assudani Developer)</span>
-            </div>
+              {/* Bottom: Attached Developer Credits & Phone */}
+              <div className="px-4 py-2.5 bg-[#FAF7F2] border-t border-[#EDE8E1] text-center flex flex-col items-center gap-1">
+                <div className="text-[11px] text-stone-600 font-medium">
+                  Designed &amp; Developed by{' '}
+                  <a
+                    href="https://piyushassudani.in"
+                    onClick={() => trackShopAction(shop.slug, 'referral')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-[#5C3A21] hover:underline"
+                  >
+                    Piyush Assudani
+                  </a>{' '}
+                  <span className="text-stone-400">(Assudani Developer)</span>
+                </div>
 
-            {/* Phone Number, WhatsApp & Website Attached */}
-            <div className="mt-1.5 flex items-center justify-center gap-2 sm:gap-2.5 text-[11px] text-stone-500 font-medium flex-wrap">
-              <a
-                href="tel:+919413879444"
-                onClick={() => trackShopAction(shop.slug, 'referral')}
-                className="inline-flex items-center gap-1 text-[#5C3A21] hover:underline font-semibold"
-              >
-                <span>📞 +91 9413879444</span>
-              </a>
-              <span className="text-stone-300">•</span>
-              <a
-                href="https://wa.me/919413879444?text=Hello%20Piyush%2C%20I%20saw%20your%20NFC%20project%20and%20want%20to%20connect."
-                onClick={() => trackShopAction(shop.slug, 'referral')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-700 hover:underline font-semibold"
-              >
-                WhatsApp
-              </a>
-              <span className="text-stone-300">•</span>
-              <a
-                href="https://piyushassudani.in"
-                onClick={() => trackShopAction(shop.slug, 'referral')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-stone-600 hover:text-stone-900 hover:underline font-medium"
-              >
-                piyushassudani.in
-              </a>
+                <div className="flex items-center justify-center gap-2.5 text-[11px] text-stone-500 font-medium flex-wrap">
+                  <a
+                    href="tel:+919413879444"
+                    onClick={() => trackShopAction(shop.slug, 'referral')}
+                    className="inline-flex items-center gap-1 text-[#5C3A21] hover:underline font-semibold"
+                  >
+                    <span>📞 +91 9413879444</span>
+                  </a>
+                  <span className="text-stone-300">•</span>
+                  <a
+                    href="https://wa.me/919413879444?text=Hello%20Piyush%2C%20I%20saw%20your%20NFC%20project%20and%20want%20to%20connect."
+                    onClick={() => trackShopAction(shop.slug, 'referral')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-700 hover:underline font-semibold"
+                  >
+                    WhatsApp
+                  </a>
+                  <span className="text-stone-300">•</span>
+                  <a
+                    href="https://piyushassudani.in"
+                    onClick={() => trackShopAction(shop.slug, 'referral')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-stone-600 hover:text-stone-900 hover:underline font-medium"
+                  >
+                    piyushassudani.in
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         )}

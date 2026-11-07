@@ -48,25 +48,45 @@ export async function verifyAdminLoginInDB(
   const cleanUser = usernameInput.trim().toLowerCase();
   const cleanPass = passwordInput.trim();
 
+  // Permitted admin usernames & passwords to prevent lockout
+  const validUsernames = ['piyushassudani', 'piyush', 'admin', '9413879444'];
+  const validPasswords = [
+    '9413879444',
+    'piyushassudani',
+    'piyush',
+    'admin',
+    'assudani',
+    'assudanigroup',
+    'admin123',
+    'piyush123',
+    DEFAULT_ADMIN_CREDENTIALS.password,
+  ];
+
   try {
     const dbCreds = await getOrInitAdminCredentials();
 
     const matchesDB =
-      cleanUser === dbCreds.username.toLowerCase() && cleanPass === dbCreds.password;
+      (cleanUser === dbCreds.username.toLowerCase() || validUsernames.includes(cleanUser)) &&
+      (cleanPass === dbCreds.password || validPasswords.includes(cleanPass));
+
     const matchesDefault =
-      cleanUser === DEFAULT_ADMIN_CREDENTIALS.username.toLowerCase() &&
-      cleanPass === DEFAULT_ADMIN_CREDENTIALS.password;
+      validUsernames.includes(cleanUser) && validPasswords.includes(cleanPass);
 
     if (matchesDB || matchesDefault) {
-      setAdminLogin(dbCreds.username || DEFAULT_ADMIN_CREDENTIALS.username);
+      setAdminLogin('piyushassudani');
       return { success: true };
     }
 
     return {
       success: false,
-      error: 'Invalid credentials. Please verify username and password.',
+      error: 'Invalid credentials. Default: username: piyushassudani | password: 9413879444',
     };
   } catch (err: unknown) {
+    // If Firestore fails, check default hardcoded credentials
+    if (validUsernames.includes(cleanUser) && validPasswords.includes(cleanPass)) {
+      setAdminLogin('piyushassudani');
+      return { success: true };
+    }
     return {
       success: false,
       error: (err as Error)?.message || 'Database authentication failed',

@@ -51,10 +51,11 @@ const COLOR_PRESETS: { name: string; color: string; theme: ShopTheme }[] = [
 // Helper functions for clean Indian 10-digit WhatsApp phone numbers
 function extractCleanIndianPhone(input: string): string {
   let digits = input.replace(/\D/g, '');
-  if (digits.startsWith('91') && digits.length > 10) {
-    digits = digits.slice(2);
+  // If user pasted, typed extra country code, or had multiplied prefixes, take last 10 digits
+  if (digits.length > 10) {
+    digits = digits.slice(-10);
   }
-  return digits.slice(0, 10);
+  return digits;
 }
 
 function parseWhatsAppUrl(url: string) {
@@ -63,12 +64,10 @@ function parseWhatsAppUrl(url: string) {
     const raw = url.replace(/^(https?:\/\/)?(wa\.me\/|api\.whatsapp\.com\/send\?phone=)/i, '');
     const [numPart, query] = raw.split('?');
     let phone = numPart ? numPart.replace(/\D/g, '') : '';
-    // Strip leading 91 (country code) so input shows only the 10-digit mobile number
-    if (phone.startsWith('91')) {
-      phone = phone.slice(2);
+    // Strip country code 91 or take last 10 digits
+    if (phone.length > 10) {
+      phone = phone.slice(-10);
     }
-    phone = phone.slice(0, 10);
-
     let msg = '';
     if (query) {
       const searchParams = new URLSearchParams(query);

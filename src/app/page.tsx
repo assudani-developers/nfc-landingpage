@@ -283,66 +283,74 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* Referral & Developer Credit */}
-        <div className="w-full pt-4 border-t border-stone-200 flex flex-col items-center text-center space-y-2">
-          <Link
-            href="/services"
-            className="w-full max-w-md py-3 px-4 rounded-2xl bg-white hover:bg-stone-50 border border-[#EDE8E1] text-xs font-semibold text-stone-800 shadow-xs flex items-center justify-between transition group hover:border-stone-300 active:scale-[0.99]"
-          >
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-bold text-stone-900">Our Other Services &amp; Digital Solutions</span>
-            </div>
-            <div className="flex items-center gap-1 text-[#5C3A21] font-bold">
-              <span>View</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </div>
-          </Link>
-
-          <div className="text-[11px] text-stone-600 font-medium pt-1">
-            Designed &amp; Developed by{' '}
-            <a
-              href="https://piyushassudani.in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-bold text-[#5C3A21] hover:underline"
+        {/* Attached "Our Other Services" & Developer Credit */}
+        <div className="w-full max-w-md pt-4 border-t border-stone-200">
+          <div className="w-full rounded-2xl bg-white border border-[#EDE8E1] shadow-xs overflow-hidden transition group hover:border-stone-300">
+            {/* Top: Our Other Services Clickable Link */}
+            <Link
+              href="/services"
+              className="w-full py-3 px-4 bg-white hover:bg-stone-50/90 flex items-center justify-between transition group-hover:bg-[#FAF7F2]/60"
             >
-              Piyush Assudani
-            </a>{' '}
-            <span className="text-stone-400">(Assudani Developer)</span>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="font-bold text-xs text-stone-900">
+                  Our Other Services &amp; Digital Solutions
+                </span>
+              </div>
+              <div className="flex items-center gap-1 text-[#5C3A21] font-bold text-xs">
+                <span>View</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </Link>
+
+            {/* Bottom: Attached Developer Credits & Phone */}
+            <div className="px-4 py-2.5 bg-[#FAF7F2] border-t border-[#EDE8E1] text-center flex flex-col items-center gap-1">
+              <div className="text-[11px] text-stone-600 font-medium">
+                Designed &amp; Developed by{' '}
+                <a
+                  href="https://piyushassudani.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-[#5C3A21] hover:underline"
+                >
+                  Piyush Assudani
+                </a>{' '}
+                <span className="text-stone-400">(Assudani Developer)</span>
+              </div>
+
+              <div className="flex items-center justify-center gap-2.5 text-[11px] text-stone-500 font-medium flex-wrap">
+                <a
+                  href="tel:+919413879444"
+                  className="inline-flex items-center gap-1 text-[#5C3A21] hover:underline font-semibold"
+                >
+                  <span>📞 +91 9413879444</span>
+                </a>
+                <span className="text-stone-300">•</span>
+                <a
+                  href="https://wa.me/919413879444?text=Hello%20Piyush%2C%20I%20saw%20your%20NFC%20project."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-700 hover:underline font-semibold"
+                >
+                  WhatsApp
+                </a>
+                <span className="text-stone-300">•</span>
+                <a
+                  href="https://piyushassudani.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-stone-600 hover:text-stone-900 hover:underline"
+                >
+                  piyushassudani.in
+                </a>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center justify-center gap-3 text-[11px] text-stone-500 font-medium">
-            <a
-              href="tel:+919413879444"
-              className="inline-flex items-center gap-1 text-[#5C3A21] hover:underline font-semibold"
-            >
-              <span>📞 +91 9413879444</span>
-            </a>
-            <span className="text-stone-300">•</span>
-            <a
-              href="https://wa.me/919413879444?text=Hello%20Piyush%2C%20I%20saw%20your%20NFC%20project."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-emerald-700 hover:underline font-semibold"
-            >
-              WhatsApp
-            </a>
-            <span className="text-stone-300">•</span>
-            <a
-              href="https://piyushassudani.in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-stone-600 hover:text-stone-900 hover:underline"
-            >
-              piyushassudani.in
-            </a>
-          </div>
-
-          <div className="pt-2">
+          <div className="pt-3 text-center">
             <Link
               href="/admin/piyush"
-              className="text-[10px] text-stone-400 hover:text-stone-700 transition font-mono flex items-center justify-center gap-1"
+              className="text-[10px] text-stone-400 hover:text-stone-700 transition font-mono inline-flex items-center justify-center gap-1"
             >
               <ShieldCheck className="w-3 h-3 text-stone-400" />
               <span>Admin Management Hub</span>

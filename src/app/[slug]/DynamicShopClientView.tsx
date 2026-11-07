@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Shop } from '@/types';
-import { getLocalShops, saveShop } from '@/lib/db';
+import { getLocalShops, getShopBySlug, saveShop } from '@/lib/db';
 import ShopPageClient from '@/components/shop/ShopPageClient';
 import { useIsClient } from '@/lib/useIsClient';
 import Link from 'next/link';
@@ -18,39 +18,66 @@ export default function DynamicShopClientView({
   serverShop,
 }: DynamicShopClientViewProps) {
   const isClient = useIsClient();
+  const [clientShop, setClientShop] = useState<Shop | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(!serverShop);
 
-  // Lazy initialize local fallback if server didn't find the shop
-  const [localShop] = useState<Shop | null>(() => {
-    if (serverShop) return null;
-    if (typeof window === 'undefined') return null;
-    const local = getLocalShops();
-    return (
-      local.find(
-        (s) => s.slug.toLowerCase().trim() === slug.toLowerCase().trim()
-      ) || null
-    );
-  });
+  const shop = serverShop || clientShop;
 
-  const shop = serverShop || localShop;
-
-  // Background sync to Cloud Firestore if shop was only found locally
   useEffect(() => {
-    if (!serverShop && localShop) {
-      saveShop(localShop).catch(() => {});
-    }
-  }, [serverShop, localShop]);
+    if (serverShop) return;
+
+    let isMounted = true;
+
+    // Asynchronously resolve local cache and remote Firestore to avoid synchronous effect renders
+    Promise.resolve().then(() => {
+      if (!isMounted) return;
+
+      const local = getLocalShops();
+      const foundLocal = local.find(
+        (s) => s.slug.toLowerCase().trim() === slug.toLowerCase().trim()
+      );
+
+      if (foundLocal) {
+        setClientShop(foundLocal);
+        setIsLoading(false);
+        saveShop(foundLocal).catch(() => {});
+        return;
+      }
+
+      // Query Firestore directly from client
+      getShopBySlug(slug)
+        .then((remoteShop) => {
+          if (isMounted) {
+            if (remoteShop) {
+              setClientShop(remoteShop);
+            }
+            setIsLoading(false);
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            setIsLoading(false);
+          }
+        });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [slug, serverShop]);
 
   if (shop) {
     return <ShopPageClient initialShop={shop} />;
   }
 
-  if (!isClient) {
+  if (!isClient || isLoading) {
     return (
       <div
-        className="min-h-screen w-full bg-[#FAF7F2] flex items-center justify-center"
+        className="min-h-screen w-full bg-[#FAF7F2] flex flex-col items-center justify-center p-4"
         suppressHydrationWarning
       >
-        <div className="w-8 h-8 rounded-full border-2 border-[#5C3A21] border-t-transparent animate-spin" />
+        <div className="w-10 h-10 rounded-full border-3 border-[#5C3A21] border-t-transparent animate-spin mb-3" />
+        <p className="text-xs font-semibold text-stone-600">Loading shop profile...</p>
       </div>
     );
   }
