@@ -42,15 +42,15 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
 
   return (
     <div
-      className="min-h-screen w-full bg-[#FAF7F2] text-stone-900 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans"
+      className="min-h-screen w-full bg-[#FAF7F2] text-stone-900 flex flex-col items-center justify-center p-3.5 sm:p-4 relative overflow-hidden font-sans"
       suppressHydrationWarning
     >
       {/* Main Login Card */}
-      <div className="w-full max-w-md bg-white border border-[#EDE8E1] rounded-3xl p-8 shadow-xl shadow-stone-200/60 relative z-10">
+      <div className="w-full max-w-md bg-white border border-[#EDE8E1] rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-xl shadow-stone-200/60 relative z-10">
         {/* Top Branding */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-[#5C3A21] p-0.5 shadow-lg shadow-[#5C3A21]/20 mb-3 flex items-center justify-center">
-            <NfcWaveIcon className="w-8 h-8 text-amber-200" />
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#5C3A21] p-0.5 shadow-lg shadow-[#5C3A21]/20 mb-3 flex items-center justify-center">
+            <NfcWaveIcon className="w-7 h-7 sm:w-8 sm:h-8 text-amber-200" />
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F3ECE4] border border-[#E5DACD] text-[#633917] text-xs font-semibold mb-2">
@@ -58,7 +58,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
             <span>Secure Management Portal</span>
           </div>
 
-          <h1 className="text-2xl font-black text-stone-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight">
             Admin Sign In
           </h1>
           <p className="text-xs text-stone-500 mt-0.5">
@@ -88,7 +88,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter username"
-                className="w-full bg-[#FBF9F5] border border-stone-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-stone-900 focus:outline-none focus:border-[#5C3A21] focus:bg-white transition"
+                className="w-full bg-[#FBF9F5] border border-stone-200 rounded-xl pl-10 pr-4 py-2.5 text-base sm:text-sm text-stone-900 focus:outline-none focus:border-[#5C3A21] focus:bg-white transition"
               />
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                className="w-full bg-[#FBF9F5] border border-stone-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-stone-900 focus:outline-none focus:border-[#5C3A21] focus:bg-white transition"
+                className="w-full bg-[#FBF9F5] border border-stone-200 rounded-xl pl-10 pr-11 py-2.5 text-base sm:text-sm text-stone-900 focus:outline-none focus:border-[#5C3A21] focus:bg-white transition"
               />
               <button
                 type="button"
@@ -127,7 +127,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3 px-4 rounded-xl font-bold text-sm bg-[#5C3A21] hover:bg-[#472c19] text-white shadow-lg shadow-[#5C3A21]/20 flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-50"
+            className="w-full mt-2 py-3 px-4 min-h-[44px] rounded-xl font-bold text-sm bg-[#5C3A21] hover:bg-[#472c19] text-white shadow-lg shadow-[#5C3A21]/20 flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -146,7 +146,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
         <div className="mt-6 text-center">
           <Link
             href="/"
-            className="text-xs text-stone-500 hover:text-stone-800 transition font-medium"
+            className="text-xs text-stone-500 hover:text-stone-800 transition font-medium inline-block py-2 px-3 rounded-lg hover:bg-stone-50"
           >
             &larr; Back to Shop Page
           </Link>

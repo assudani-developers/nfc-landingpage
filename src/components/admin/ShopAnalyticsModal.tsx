@@ -107,76 +107,76 @@ export default function ShopAnalyticsModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto font-sans">
-      <div className="bg-white border border-[#EDE8E1] rounded-3xl max-w-xl w-full p-6 sm:p-8 relative shadow-2xl my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto font-sans">
+      <div className="bg-white border border-[#EDE8E1] rounded-2xl sm:rounded-3xl max-w-xl w-full p-4 sm:p-8 relative shadow-2xl my-auto max-h-[96dvh] overflow-y-auto">
         {/* Top Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-stone-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#5C3A21] flex items-center justify-center shadow-md shadow-[#5C3A21]/20">
-              <TrendingUp className="w-5 h-5 text-amber-200" />
+        <div className="flex items-start sm:items-center justify-between pb-3 sm:pb-4 border-b border-stone-200 pr-9 sm:pr-0">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[#5C3A21] flex items-center justify-center shadow-md shadow-[#5C3A21]/20 flex-shrink-0">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-amber-200" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-stone-900">{shop.name}</h2>
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h2 className="text-base sm:text-lg font-bold text-stone-900">{shop.name}</h2>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#FAF7F2] text-[#5C3A21] border border-stone-200">
                   /{shop.slug}
                 </span>
               </div>
-              <p className="text-xs text-stone-500">
+              <p className="text-[11px] sm:text-xs text-stone-500">
                 Live Visitor Taps, Button Clicks &amp; Referral Analytics
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-stone-100 text-stone-500 hover:text-stone-900 hover:bg-stone-200 transition"
+            className="absolute top-4 right-4 p-2 rounded-full bg-stone-100 text-stone-500 hover:text-stone-900 hover:bg-stone-200 transition min-w-[36px] min-h-[36px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* 3 Main Stat Cards */}
-        <div className="grid grid-cols-3 gap-3 my-5">
-          <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] text-center">
-            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-stone-500 mb-1">
-              <Smartphone className="w-3.5 h-3.5 text-[#5C3A21]" />
-              <span>NFC Taps</span>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 my-4 sm:my-5">
+          <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] text-center">
+            <div className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-semibold text-stone-500 mb-1">
+              <Smartphone className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#5C3A21]" />
+              <span className="truncate">NFC Taps</span>
             </div>
-            <div className="text-2xl font-black text-stone-900">{totalTaps}</div>
-            <span className="text-[10px] text-stone-400">Total Visits</span>
+            <div className="text-xl sm:text-2xl font-black text-stone-900">{totalTaps}</div>
+            <span className="text-[9px] sm:text-[10px] text-stone-400 block truncate">Total Visits</span>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] text-center">
-            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-stone-500 mb-1">
-              <MousePointerClick className="w-3.5 h-3.5 text-blue-600" />
-              <span>Total Clicks</span>
+          <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-[#FAF7F2] border border-[#EDE8E1] text-center">
+            <div className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-semibold text-stone-500 mb-1">
+              <MousePointerClick className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600" />
+              <span className="truncate">Total Clicks</span>
             </div>
-            <div className="text-2xl font-black text-blue-700">{totalLinkClicks}</div>
-            <span className="text-[10px] text-stone-400">Button Actions</span>
+            <div className="text-xl sm:text-2xl font-black text-blue-700">{totalLinkClicks}</div>
+            <span className="text-[9px] sm:text-[10px] text-stone-400 block truncate">Button Actions</span>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-center">
-            <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-purple-800 mb-1">
-              <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-              <span>Referrals</span>
+          <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-purple-50 border border-purple-200 text-center">
+            <div className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-purple-800 mb-1">
+              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-purple-600" />
+              <span className="truncate">Referrals</span>
             </div>
-            <div className="text-2xl font-black text-purple-900">{referralClicks}</div>
-            <span className="text-[10px] text-purple-600 font-medium">To Piyush Services</span>
+            <div className="text-xl sm:text-2xl font-black text-purple-900">{referralClicks}</div>
+            <span className="text-[9px] sm:text-[10px] text-purple-600 font-medium block truncate">Piyush Assudani</span>
           </div>
         </div>
 
         {/* Breakdown Section: "Kahan Clicks Hue" */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
+            <h3 className="text-[11px] sm:text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
               <span>Clicks Breakdown (Kahan Clicks Hue)</span>
             </h3>
-            <span className="text-[11px] font-mono text-stone-500">
+            <span className="text-[10px] sm:text-[11px] font-mono text-stone-500">
               {totalLinkClicks} total actions
             </span>
           </div>
 
-          <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-60 sm:max-h-72 overflow-y-auto pr-1">
             {breakdown.map((item) => {
               const percentage =
                 totalLinkClicks > 0
@@ -186,11 +186,11 @@ export default function ShopAnalyticsModal({
               return (
                 <div
                   key={item.id}
-                  className="p-3 rounded-2xl bg-[#FBF9F5] border border-stone-200/80 hover:border-stone-300 transition"
+                  className="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-[#FBF9F5] border border-stone-200/80 hover:border-stone-300 transition"
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      {item.icon}
+                    <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                      <div className="flex-shrink-0">{item.icon}</div>
                       <div className="min-w-0">
                         <span className="text-xs font-bold text-stone-900 block truncate">
                           {item.label}
@@ -202,7 +202,7 @@ export default function ShopAnalyticsModal({
                     </div>
 
                     <div className="text-right flex-shrink-0 ml-2">
-                      <span className="text-sm font-black text-stone-900">
+                      <span className="text-xs sm:text-sm font-black text-stone-900">
                         {item.count}
                       </span>
                       <span className="text-[10px] text-stone-500 block">
@@ -225,7 +225,7 @@ export default function ShopAnalyticsModal({
         </div>
 
         {/* Footer actions */}
-        <div className="mt-6 pt-4 border-t border-stone-200 flex items-center justify-between">
+        <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3">
           {onReset && (
             <button
               type="button"
@@ -234,19 +234,19 @@ export default function ShopAnalyticsModal({
                   await onReset();
                 }
               }}
-              className="text-stone-400 hover:text-stone-700 text-xs font-medium flex items-center gap-1 transition"
+              className="text-stone-400 hover:text-stone-700 text-xs font-medium flex items-center gap-1 transition py-1 order-2 sm:order-1"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Reset Counters</span>
             </button>
           )}
 
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto order-1 sm:order-2 justify-end">
             <a
               href={`/${shop.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold flex items-center gap-1.5 transition"
+              className="flex-1 sm:flex-initial px-3.5 py-2.5 sm:py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold flex items-center justify-center gap-1.5 transition min-h-[40px]"
             >
               <span>View Live Page</span>
               <ExternalLink className="w-3.5 h-3.5 text-stone-500" />
@@ -255,7 +255,7 @@ export default function ShopAnalyticsModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-[#5C3A21] hover:bg-[#472c19] text-white text-xs font-bold transition shadow-xs"
+              className="flex-1 sm:flex-initial px-4 py-2.5 sm:py-2 rounded-xl bg-[#5C3A21] hover:bg-[#472c19] text-white text-xs font-bold transition shadow-xs min-h-[40px]"
             >
               Close
             </button>
